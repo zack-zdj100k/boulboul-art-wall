@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, ShoppingBag, Trash2, UserPlus } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -90,25 +90,19 @@ export function CartView({ customer }: { customer: CheckoutCustomer | null }) {
         </dl>
         <p className="text-xs text-stone">{t("cart.oneDelivery")}</p>
         {error && <p role="alert" className="text-sm text-ember">{error}</p>}
-        {customer ? (
-          <Button size="lg" variant="gold" disabled={!quote} onClick={() => setOpen(true)}>
-            <ShoppingBag className="size-4" aria-hidden /> {t("cart.checkout")}
-          </Button>
-        ) : (
-          <>
-            <ButtonLink href="/account/register?next=%2Fcommande" size="lg" variant="gold">
-              <UserPlus className="size-4" aria-hidden /> {t("auth.createToOrder")}
-            </ButtonLink>
-            <p className="text-center text-xs text-stone">
-              {t("auth.accountRequired")}{" "}
-              <Link href="/account/login?next=%2Fcommande" className="font-semibold text-gold hover:underline">{t("auth.alreadyAccount")}</Link>
-            </p>
-          </>
+        <Button size="lg" variant="gold" disabled={!quote} onClick={() => setOpen(true)}>
+          <ShoppingBag className="size-4" aria-hidden /> {t("cart.checkout")}
+        </Button>
+        {!customer && (
+          <p className="text-center text-xs text-stone">
+            {t("auth.accountWithOrder")}{" "}
+            <Link href="/account/login?next=%2Fcommande" className="font-semibold text-gold hover:underline">{t("auth.alreadyAccount")}</Link>
+          </p>
         )}
         <ButtonLink href="/wall-art" variant="ghost" size="sm">{t("cart.continue")}</ButtonLink>
       </aside>
 
-      {quote && customer && <CheckoutDialog open={open} onClose={() => setOpen(false)} lines={lines.map((l) => ({ config: l.config, product: l.product }))} customer={customer} onPlaced={() => cart.clear()} />}
+      {quote && <CheckoutDialog open={open} onClose={() => setOpen(false)} lines={lines.map((l) => ({ config: l.config, product: l.product }))} customer={customer} onPlaced={() => cart.clear()} />}
     </div>
   );
 }

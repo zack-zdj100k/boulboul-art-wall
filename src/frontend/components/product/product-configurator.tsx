@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, MessageCircle, Minus, Plus, Ruler, ShoppingBag, ShoppingBasket, UserPlus } from "lucide-react";
+import { Check, MessageCircle, Minus, Plus, Ruler, ShoppingBag, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/frontend/components/ui/badge";
@@ -446,17 +446,10 @@ export function ProductConfigurator({ product, customer, contactHref }: { produc
           </div>
         </div>
         <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-          {customer ? (
-            <Button size="lg" variant="gold" className="flex-1" disabled={!quote || loading} onClick={() => setCheckoutOpen(true)}>
-              <ShoppingBag className="size-4" aria-hidden />
-              {t("product.buyNow")}
-            </Button>
-          ) : (
-            <Link href={`/account/register?next=${encodeURIComponent(`/wall-art/${product.slug}`)}`} className={buttonClasses("gold", "lg", "flex-1")}>
-              <UserPlus className="size-4" aria-hidden />
-              {t("auth.createToOrder")}
-            </Link>
-          )}
+          <Button size="lg" variant="gold" className="flex-1" disabled={!quote || loading} onClick={() => setCheckoutOpen(true)}>
+            <ShoppingBag className="size-4" aria-hidden />
+            {t("product.buyNow")}
+          </Button>
           <Button
             size="lg"
             variant="outline"
@@ -479,7 +472,7 @@ export function ProductConfigurator({ product, customer, contactHref }: { produc
       </div>
       {!customer && (
         <p className="-mt-4 text-xs text-stone">
-          {t("auth.accountRequired")}{" "}
+          {t("auth.accountWithOrder")}{" "}
           <Link href={`/account/login?next=${encodeURIComponent(`/wall-art/${product.slug}`)}`} className="font-semibold text-gold hover:underline">
             {t("auth.alreadyAccount")}
           </Link>
@@ -497,7 +490,7 @@ export function ProductConfigurator({ product, customer, contactHref }: { produc
         </p>
       )}
 
-      {quote && customer && (
+      {quote && (
         <CheckoutDialog
           open={checkoutOpen}
           onClose={() => setCheckoutOpen(false)}

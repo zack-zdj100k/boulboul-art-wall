@@ -225,6 +225,12 @@ const fr = {
     confirming: "Envoi de la commande…",
     paymentNote: "Aucun paiement en ligne : Boulboul vous contacte pour confirmer votre commande.",
     loggedInAs: "Connecté en tant que {name}",
+    stepAccount: "Votre compte",
+    accountTitle: "Créez votre compte Boulboul en même temps",
+    accountIntro: "Votre compte est créé avec ces informations ({email}) : vous suivrez votre commande, vos retours et vos prochaines demandes.",
+    accountWillBeCreated: "Compte créé avec la commande",
+    emailTaken: "Un compte existe déjà avec cet e-mail : connectez-vous pour commander.",
+    signInInstead: "Se connecter",
   },
   order: {
     successTitle: "Merci, votre commande est enregistrée.",
@@ -295,9 +301,8 @@ const fr = {
     optionsTotal: "Options choisies",
   },
   auth: {
-    createToOrder: "Créer un compte pour commander",
-    accountRequired: "Un compte Boulboul est nécessaire pour commander : il vous permet de suivre vos commandes et vos demandes.",
     alreadyAccount: "Déjà un compte ? Se connecter",
+    accountWithOrder: "Votre compte Boulboul est créé en même temps que votre commande, pour la suivre.",
     loginTitle: "Connexion",
     loginIntro: "Retrouvez vos commandes et vos demandes personnalisées.",
     registerTitle: "Créer un compte",

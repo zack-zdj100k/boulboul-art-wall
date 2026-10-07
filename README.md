@@ -57,7 +57,7 @@ One Next.js app (deployed as one project on Vercel), with the code split by role
 prisma/
   schema/            database schema, one file per domain (00-config, 01-identity, 02-media,
                      03-catalog, 04-orders, 05-returns, 06-custom-orders, 07-reviews,
-                     08-notifications, 09-site)
+                     08-notifications, 09-site, 10-analytics)
   migrations/        SQL migrations (applied by `prisma migrate deploy` on every Vercel build)
   seed.ts, data/     development demo data, ZR Express delivery rates
 
@@ -106,6 +106,16 @@ tests/               pricing, order flow & emails, auth, uploads, custom orders,
 - **Custom requests** store a private upload (re-encoded to strip EXIF/GPS), dimensions, frame,
   extras and description; no automatic email.
 - **Reviews** are public only once approved; « Accueil » toggles home testimonials.
+- **Accounts at checkout.** Every order belongs to an account. A visitor who is not signed in fills in
+  the delivery details, then a password, age and « Comment avez-vous connu Boulboul ? »: the account is
+  created with the order (and signed in). If the e-mail already has an account, the customer is asked to sign in.
+- **Traffic analytics** (*Admin → Réseaux sociaux*): each browsing session records its source — `utm_*`
+  campaign links, ad click ids (`fbclid`, `ttclid`, `gclid`), the referrer, or the Instagram / TikTok /
+  Facebook in-app browser. Orders and new accounts are credited to the last non-direct source (30 days).
+  The page shows visits, visitors, accounts, orders, conversion and delivered sales per network and per
+  campaign, plus a tracked-link builder for bios, stories and sponsored posts. No IP address or personal
+  data is stored (random first-party visitor id); admins and bots are not counted; visits older than
+  13 months are purged.
 
 ### Security
 

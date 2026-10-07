@@ -58,12 +58,25 @@ export const loginSchema = z.object({
 
 export const REFERRAL_SOURCES = ["TIKTOK", "INSTAGRAM", "FACEBOOK", "OTHER"] as const;
 
+const ageSchema = z.coerce.number({ error: "validation.age" }).int({ error: "validation.age" }).min(13, { error: "validation.age" }).max(120, { error: "validation.age" });
+
 export const registerSchema = z
   .object({
     fullName: requiredText(120, 2),
-    age: z.coerce.number({ error: "validation.age" }).int({ error: "validation.age" }).min(13, { error: "validation.age" }).max(120, { error: "validation.age" }),
+    age: ageSchema,
     phone: phoneSchema,
     email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string({ error: "validation.required" }),
+    referralSource: z.enum(REFERRAL_SOURCES, { error: "validation.required" }),
+    referralOther: optionalText(120),
+  })
+  .refine((d) => d.password === d.confirmPassword, { path: ["confirmPassword"], error: "validation.passwordMismatch" });
+
+/** Account created while ordering: name, e-mail and phone come from the delivery details. */
+export const checkoutAccountSchema = z
+  .object({
+    age: ageSchema,
     password: passwordSchema,
     confirmPassword: z.string({ error: "validation.required" }),
     referralSource: z.enum(REFERRAL_SOURCES, { error: "validation.required" }),
@@ -113,6 +126,8 @@ export const createOrderSchema = z.object({
   // `items` keeps the API cart-ready; Buy Now sends exactly one item.
   items: z.array(configurationSchema).min(1).max(20),
   customer: customerSchema,
+  // Visitors who are not signed in create their account with the order.
+  account: checkoutAccountSchema.optional(),
 });
 // Parsed shape, with `extraChoices` optional for internal callers (the API always passes parsed data).
 type ItemInput = Omit<z.infer<typeof configurationSchema>, "extraChoices"> & { extraChoices?: z.infer<typeof extraChoiceSchema>[] };

@@ -3,7 +3,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, Check, Home, Lock, Store } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/frontend/components/ui/button";
 import { Dialog } from "@/frontend/components/ui/dialog";
@@ -18,13 +19,15 @@ import { api, ApiError } from "@/frontend/lib/api-client";
 import type { CartConfig } from "@/frontend/lib/cart";
 import { describeExtra } from "@/shared/lib/options";
 import { cn } from "@/shared/lib/utils";
-import { customerSchema } from "@/shared/lib/validation";
+import { REFERRAL_SOURCES, checkoutAccountSchema, customerSchema } from "@/shared/lib/validation";
 import type { Breakdown } from "./product-configurator";
 
 export type CheckoutCustomer = { customerName: string; email: string; phone: string };
 export type CheckoutLine = { config: CartConfig; product: { name: string; image: string | null } };
 
 type Form = { customerName: string; email: string; phone: string; wilayaCode: string; commune: string; address: string; notes: string; deliveryMethod: "HOME" | "STOP_DESK" };
+type AccountForm = { age: string; password: string; confirmPassword: string; referralSource: string; referralOther: string };
+type Stage = "info" | "account" | "review";
 type Quote = {
   subtotal: number;
   delivery: { fee: number | null; free: boolean; home: number | null; stopDesk: number | null; method: "HOME" | "STOP_DESK" };
@@ -32,7 +35,11 @@ type Quote = {
   items: { productName: string; quote: Breakdown }[];
 };
 
-/** Customer details → review → order (one delivery for every line). Prices always come from the server. */
+/**
+ * Customer details → (account, for visitors who are not signed in) → review → order, one delivery
+ * for every line. The account is created on the server together with the order. Prices always
+ * come from the server.
+ */
 export function CheckoutDialog({
   open,
   onClose,
@@ -48,8 +55,12 @@ export function CheckoutDialog({
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
+  const pathname = usePathname();
   const toast = useToast();
-  const [step, setStep] = useState(0);
+  const needsAccount = !customer;
+  const stages: Stage[] = needsAccount ? ["info", "account", "review"] : ["info", "review"];
+  const [stage, setStage] = useState<Stage>("info");
+  const [account, setAccount] = useState<AccountForm>({ age: "", password: "", confirmPassword: "", referralSource: "", referralOther: "" });
   const [form, setForm] = useState<Form>({
     customerName: customer?.customerName ?? "",
     email: customer?.email ?? "",
@@ -67,6 +78,10 @@ export function CheckoutDialog({
 
   const set = (k: keyof Form) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
+    setErrors((x) => ({ ...x, [k]: "" }));
+  };
+  const setAcc = (k: keyof AccountForm) => (value: string) => {
+    setAccount((a) => ({ ...a, [k]: value }));
     setErrors((x) => ({ ...x, [k]: "" }));
   };
 
@@ -102,22 +117,46 @@ export function CheckoutDialog({
     return false;
   };
 
+  const accountPayload = () => ({ ...account, referralOther: account.referralOther || undefined });
+
+  const validateAccount = () => {
+    const parsed = checkoutAccountSchema.safeParse(accountPayload());
+    if (parsed.success) {
+      setErrors({});
+      return true;
+    }
+    const next: Record<string, string> = {};
+    for (const issue of parsed.error.issues) next[String(issue.path[0])] ??= issue.message;
+    setErrors(next);
+    document.querySelector<HTMLElement>(`[name="${Object.keys(next)[0]}"]`)?.focus();
+    return false;
+  };
+
   const submit = async () => {
     setSubmitting(true);
     try {
       const res = await api<{ orderNumber: string; token: string }>("/api/orders", {
         method: "POST",
-        json: { items: JSON.parse(configsKey), customer: { ...form, deliveryMethod: method, notes: form.notes || undefined } },
+        json: {
+          items: JSON.parse(configsKey),
+          customer: { ...form, deliveryMethod: method, notes: form.notes || undefined },
+          account: needsAccount ? accountPayload() : undefined,
+        },
       });
       onPlaced?.();
       router.push(`/order/${encodeURIComponent(res.orderNumber)}?token=${encodeURIComponent(res.token)}`);
+      if (needsAccount) router.refresh(); // the header now shows the new account
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError(0, "errors.generic");
       const fields: Record<string, string> = {};
-      for (const [k, v] of Object.entries(err.fields)) fields[k.replace(/^customer\./, "")] = v;
-      if (Object.keys(fields).length) {
+      let back: Stage | null = null;
+      for (const [k, v] of Object.entries(err.fields)) {
+        fields[k.replace(/^(customer|account)\./, "")] = v;
+        back ??= k.startsWith("account.") ? "account" : "info";
+      }
+      if (back) {
         setErrors(fields);
-        setStep(0);
+        setStage(back);
       }
       toast.show(t(err.code), "error");
       setSubmitting(false);
@@ -137,7 +176,7 @@ export function CheckoutDialog({
   return (
     <Dialog open={open} onClose={onClose} title={t("checkout.title")} size="lg" closeLabel={t("common.close")}>
       <div className="flex flex-col gap-6 p-6 md:p-8">
-        <StepIndicator steps={[t("checkout.stepInfo"), t("checkout.stepReview")]} current={step} />
+        <StepIndicator steps={stages.map((st) => t(st === "info" ? "checkout.stepInfo" : st === "account" ? "checkout.stepAccount" : "checkout.stepReview"))} current={stages.indexOf(stage)} />
 
         <ul className="flex flex-col gap-2">
           {lines.map((l, i) => {
@@ -163,7 +202,7 @@ export function CheckoutDialog({
         </ul>
 
         <AnimatePresence mode="wait" initial={false}>
-          {step === 0 ? (
+          {stage === "info" ? (
             <motion.form
               key="info"
               initial={{ opacity: 0, x: 24 }}
@@ -173,7 +212,7 @@ export function CheckoutDialog({
               noValidate
               onSubmit={(ev) => {
                 ev.preventDefault();
-                if (validate()) setStep(1);
+                if (validate()) setStage(needsAccount ? "account" : "review");
               }}
               className="grid gap-5 sm:grid-cols-2"
             >
@@ -186,6 +225,11 @@ export function CheckoutDialog({
               <Field label={t("checkout.phone")} error={e("phone")}>
                 {(p) => <Input {...p} name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="05 xx xx xx xx" value={form.phone} onChange={set("phone")} required dir="ltr" />}
               </Field>
+              {errors.email === "checkout.emailTaken" && (
+                <Link href={`/account/login?next=${encodeURIComponent(pathname)}`} className="-mt-3 text-sm font-semibold text-gold hover:underline sm:col-span-2">
+                  {t("checkout.signInInstead")} →
+                </Link>
+              )}
               <Field label={t("checkout.wilaya")} error={e("wilayaCode")}>
                 {(p) => (
                   <Select
@@ -251,6 +295,68 @@ export function CheckoutDialog({
                 </Button>
               </div>
             </motion.form>
+          ) : stage === "account" ? (
+            <motion.form
+              key="account"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.25 }}
+              noValidate
+              onSubmit={(ev) => {
+                ev.preventDefault();
+                if (validateAccount()) setStage("review");
+              }}
+              className="grid gap-5 sm:grid-cols-2"
+            >
+              <div className="flex flex-col gap-1 rounded-field border border-gold/30 bg-gold/5 p-4 sm:col-span-2">
+                <p className="font-semibold">{t("checkout.accountTitle")}</p>
+                <p className="text-sm text-sand">{t("checkout.accountIntro", { email: form.email })}</p>
+                <Link href={`/account/login?next=${encodeURIComponent(pathname)}`} className="mt-1 w-fit text-xs font-semibold text-gold hover:underline">
+                  {t("auth.alreadyAccount")}
+                </Link>
+              </div>
+              <Field label={t("auth.password")} error={e("password")} hint={t("auth.passwordHint")}>
+                {(p) => <Input {...p} name="password" type="password" autoComplete="new-password" value={account.password} onChange={(ev) => setAcc("password")(ev.target.value)} required />}
+              </Field>
+              <Field label={t("auth.confirmPassword")} error={e("confirmPassword")}>
+                {(p) => <Input {...p} name="confirmPassword" type="password" autoComplete="new-password" value={account.confirmPassword} onChange={(ev) => setAcc("confirmPassword")(ev.target.value)} required />}
+              </Field>
+              <Field label={t("auth.age")} error={e("age")}>
+                {(p) => <Input {...p} name="age" type="number" inputMode="numeric" min={13} max={120} className="max-w-32" value={account.age} onChange={(ev) => setAcc("age")(ev.target.value)} required />}
+              </Field>
+              <fieldset className="flex flex-col gap-2 sm:col-span-2">
+                <legend className="mb-2 text-[13px] font-semibold text-sand">{t("auth.referral")}</legend>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {REFERRAL_SOURCES.map((src) => (
+                    <label
+                      key={src}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2 rounded-field border px-3 py-3 text-sm font-semibold transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold",
+                        account.referralSource === src ? "border-gold bg-gold/10" : "border-line-strong text-sand hover:border-ivory/50",
+                      )}
+                    >
+                      <input type="radio" name="referralSource" value={src} checked={account.referralSource === src} onChange={() => setAcc("referralSource")(src)} className="size-4 accent-[var(--color-gold)]" />
+                      {t(`auth.referralOptions.${src}`)}
+                    </label>
+                  ))}
+                </div>
+                {e("referralSource") && <p role="alert" className="text-xs text-ember">⚠ {e("referralSource")}</p>}
+              </fieldset>
+              {account.referralSource === "OTHER" && (
+                <Field label={t("auth.referralOther")} optional={t("common.optional")} className="sm:col-span-2">
+                  {(p) => <Input {...p} name="referralOther" value={account.referralOther} onChange={(ev) => setAcc("referralOther")(ev.target.value)} maxLength={120} />}
+                </Field>
+              )}
+              <div className="flex flex-col-reverse gap-3 sm:col-span-2 sm:flex-row sm:justify-between">
+                <Button variant="ghost" type="button" onClick={() => setStage("info")}>
+                  <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden /> {t("common.back")}
+                </Button>
+                <Button type="submit" size="lg">
+                  {t("common.continue")}
+                </Button>
+              </div>
+            </motion.form>
           ) : (
             <motion.div key="review" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.25 }} className="flex flex-col gap-6">
               <dl className="grid gap-x-6 gap-y-3 rounded-field border border-line p-5 text-sm sm:grid-cols-[auto_1fr]">
@@ -287,6 +393,15 @@ export function CheckoutDialog({
                   {method === "STOP_DESK" ? `${t("checkout.stopDesk")} — ` : ""}
                   {form.address}, {form.commune}, {getWilaya(form.wilayaCode) ? wilayaLabel(getWilaya(form.wilayaCode)!, locale) : ""}
                 </dd>
+                {needsAccount && (
+                  <>
+                    <dt className="text-stone">{t("checkout.stepAccount")}</dt>
+                    <dd>
+                      <span dir="ltr">{form.email}</span>
+                      <span className="block text-xs text-stone">{t("checkout.accountWillBeCreated")}</span>
+                    </dd>
+                  </>
+                )}
               </dl>
 
               <dl className="flex flex-col gap-3 rounded-field bg-umber-800/60 p-5 text-sm">
@@ -313,7 +428,7 @@ export function CheckoutDialog({
               </p>
 
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-                <Button variant="ghost" onClick={() => setStep(0)} disabled={submitting}>
+                <Button variant="ghost" onClick={() => setStage(needsAccount ? "account" : "info")} disabled={submitting}>
                   <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden /> {t("common.back")}
                 </Button>
                 <Button size="lg" variant="gold" onClick={submit} loading={submitting} disabled={!quote} icon={<Check className="size-4" aria-hidden />}>

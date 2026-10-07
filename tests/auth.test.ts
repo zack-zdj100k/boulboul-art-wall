@@ -8,7 +8,10 @@ import { createOrder } from "@/backend/services/order";
 import { createProductFixture, createUser, customer, resetDb } from "./helpers";
 
 const session = vi.hoisted(() => ({ user: null as null | { id: string; email: string; fullName: string; role: "ADMIN" | "CUSTOMER" } }));
-vi.mock("@/backend/auth/session", () => ({ getCurrentUser: async () => session.user }));
+const created = vi.hoisted(() => ({ sessions: [] as string[] }));
+vi.mock("@/backend/auth/session", () => ({ getCurrentUser: async () => session.user, createSession: async (userId: string) => void created.sessions.push(userId) }));
+// Traffic attribution reads a cookie; outside a real request, pretend the visitor came from TikTok.
+vi.mock("@/backend/services/traffic", () => ({ readAttribution: async () => ({ source: "tiktok", campaign: "promo-led" }) }));
 // Route handlers read the language cookie; outside a real request the locale is French.
 vi.mock("@/shared/i18n/server", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/shared/i18n/server")>()), getLocale: async () => "fr" }));
 
@@ -16,6 +19,7 @@ beforeEach(async () => {
   await resetDb();
   memoryProvider.reset();
   session.user = null;
+  created.sessions = [];
 });
 
 describe("Passwords", () => {
@@ -57,25 +61,58 @@ describe("Registration & login", () => {
 });
 
 describe("Ordering requires an account", () => {
-  async function postOrder(productId: string) {
+  const account = { age: 31, password: "Password123", confirmPassword: "Password123", referralSource: "INSTAGRAM" };
+
+  async function postOrder(productId: string, extra: Record<string, unknown> = {}) {
     const { POST } = await import("@/app/api/orders/route");
     const req = new NextRequest("http://localhost:3000/api/orders", {
       method: "POST",
       headers: { "content-type": "application/json", origin: "http://localhost:3000" },
-      body: JSON.stringify({ items: [{ productId, widthCm: 100, heightCm: 100, extraIds: [], quantity: 1 }], customer }),
+      body: JSON.stringify({ items: [{ productId, widthCm: 100, heightCm: 100, extraIds: [], quantity: 1 }], customer, ...extra }),
     });
     return POST(req, { params: Promise.resolve({}) });
   }
 
-  it("refuses visitors who are not signed in (401) and links the order to the account otherwise", async () => {
+  it("links the order of a signed-in customer to their account", async () => {
     const { product } = await createProductFixture();
-    expect((await postOrder(product.id)).status).toBe(401);
-    expect(await prisma.order.count()).toBe(0);
     const c = await createUser("CUSTOMER");
     session.user = { id: c.id, email: c.email, fullName: c.fullName, role: "CUSTOMER" };
     const res = await postOrder(product.id);
     expect(res.status).toBe(201);
-    expect((await prisma.order.findFirstOrThrow()).userId).toBe(c.id);
+    const order = await prisma.order.findFirstOrThrow();
+    expect(order.userId).toBe(c.id);
+    expect(order).toMatchObject({ trafficSource: "tiktok", trafficCampaign: "promo-led" });
+    expect(created.sessions).toHaveLength(0);
+  });
+
+  it("refuses a visitor without account details, creates the account with the order otherwise", async () => {
+    const { product } = await createProductFixture();
+    expect((await postOrder(product.id)).status).toBe(422);
+    expect((await postOrder(product.id, { account: { ...account, confirmPassword: "Other1234" } })).status).toBe(422);
+    expect(await prisma.order.count()).toBe(0);
+    expect(await prisma.user.count()).toBe(0);
+
+    const res = await postOrder(product.id, { account });
+    expect(res.status).toBe(201);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email: customer.email.toLowerCase() } });
+    expect(user).toMatchObject({ role: "CUSTOMER", fullName: customer.customerName, age: 31, referralSource: "INSTAGRAM", signupSource: "tiktok" });
+    expect(user.passwordHash).not.toContain("Password123");
+    expect((await prisma.order.findFirstOrThrow()).userId).toBe(user.id);
+    expect(created.sessions).toEqual([user.id]); // signed in right away
+  });
+
+  it("asks an existing customer to sign in, and never leaves an account behind when the order fails", async () => {
+    const { product } = await createProductFixture();
+    await createUser("CUSTOMER", customer.email.toLowerCase());
+    const taken = await postOrder(product.id, { account });
+    expect(taken.status).toBe(409);
+    expect((await taken.json()).error.fields).toEqual({ "customer.email": "checkout.emailTaken" });
+
+    await prisma.user.deleteMany();
+    const bad = await postOrder(product.id, { account, customer: { ...customer, commune: "Commune inconnue" } });
+    expect(bad.status).toBe(400);
+    expect(await prisma.user.count()).toBe(0);
+    expect(await prisma.order.count()).toBe(0);
   });
 });
 

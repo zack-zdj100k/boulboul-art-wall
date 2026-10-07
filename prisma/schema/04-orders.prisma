@@ -54,6 +54,9 @@ model Order {
   status             OrderStatus    @default(PENDING)
   managerNotes       String? // private to admins
   locale             String         @default("fr")
+  // Where the customer came from (social network / campaign), measured automatically.
+  trafficSource      String?
+  trafficCampaign    String?
   isDemo             Boolean        @default(false)
   confirmedAt        DateTime?
   createdAt          DateTime       @default(now())

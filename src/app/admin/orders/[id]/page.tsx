@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { sourceInfo } from "@/shared/lib/traffic";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { DeleteOrderButton } from "@/frontend/components/admin/delete-order-button";
@@ -266,6 +267,8 @@ export default async function AdminOrderDetail(props: PageProps<"/admin/orders/[
               <dt className="text-stone">Adresse</dt><dd>{address}</dd>
               <dt className="text-stone">Compte</dt>
               <dd>{order.user ? <Link href={`/admin/customers?q=${encodeURIComponent(order.user.email)}`} className="text-gold hover:underline">Client inscrit · {order.user._count.orders} commande(s)</Link> : "Commande invité"}</dd>
+              <dt className="text-stone">Venu de</dt>
+              <dd>{order.trafficSource ? <Link href="/admin/analytics" className="hover:text-gold">{sourceInfo(order.trafficSource).label}{order.trafficCampaign ? ` · campagne « ${order.trafficCampaign} »` : ""}</Link> : "—"}</dd>
             </dl>
             <CustomerQuickActions name={order.customerName} phone={order.phone} email={order.email} address={address} orderNumber={order.orderNumber} total={order.total} status={order.status} />
           </Panel>

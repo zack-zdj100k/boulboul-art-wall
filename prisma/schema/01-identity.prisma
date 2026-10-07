@@ -21,6 +21,9 @@ model User {
   phone          String?
   referralSource ReferralSource?
   referralOther  String?
+  // Measured automatically (see 10-analytics.prisma): where the visitor came from before signing up.
+  signupSource   String?
+  signupCampaign String?
   role           Role            @default(CUSTOMER)
   isActive       Boolean         @default(true)
   isDemo         Boolean         @default(false)

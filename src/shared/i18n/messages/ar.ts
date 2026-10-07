@@ -216,6 +216,12 @@ const ar: Messages = {
     confirming: "جارٍ إرسال الطلب…",
     paymentNote: "لا يوجد دفع إلكتروني: يتواصل معك Boulboul لتأكيد طلبك.",
     loggedInAs: "متصل باسم {name}",
+    stepAccount: "حسابك",
+    accountTitle: "أنشئ حسابك في Boulboul في نفس الوقت",
+    accountIntro: "سيُنشأ حسابك بهذه المعلومات ({email}): ستتابع طلبك ومرتجعاتك وطلباتك القادمة.",
+    accountWillBeCreated: "يُنشأ الحساب مع الطلب",
+    emailTaken: "يوجد حساب بهذا البريد الإلكتروني: سجّل الدخول لإتمام الطلب.",
+    signInInstead: "تسجيل الدخول",
   },
   order: {
     successTitle: "شكراً، تم تسجيل طلبك.",
@@ -278,9 +284,8 @@ const ar: Messages = {
     optionsTotal: "الإضافات المختارة",
   },
   auth: {
-    createToOrder: "أنشئ حساباً للطلب",
-    accountRequired: "يلزم حساب Boulboul لإتمام الطلب: يتيح لك متابعة طلباتك وطلباتك الخاصة.",
     alreadyAccount: "لديك حساب؟ سجّل الدخول",
+    accountWithOrder: "يُنشأ حسابك في Boulboul مع طلبك، لتتمكن من متابعته.",
     loginTitle: "تسجيل الدخول",
     loginIntro: "تابع طلباتك وطلباتك المخصصة.",
     registerTitle: "إنشاء حساب",

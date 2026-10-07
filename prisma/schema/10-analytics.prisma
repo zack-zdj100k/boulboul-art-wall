@@ -1,0 +1,18 @@
+// Traffic analytics: where visitors come from (social networks, search engines, campaigns).
+// One row per browsing session. No IP address, no personal data: `visitorId` is a random
+// identifier kept in a first-party cookie, only used to count unique visitors.
+
+model Visit {
+  id           String   @id @default(cuid())
+  visitorId    String
+  source       String // facebook, instagram, tiktok, google… "direct" or "other" (see src/shared/lib/traffic.ts)
+  medium       String? // utm_medium: bio, story, post, paid…
+  campaign     String? // utm_campaign
+  referrerHost String?
+  landingPath  String
+  device       String // mobile | tablet | desktop
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([source, createdAt])
+}

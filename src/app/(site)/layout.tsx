@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/frontend/components/site/site-footer";
 import { SiteHeader } from "@/frontend/components/site/site-header";
+import { TrafficTracker } from "@/frontend/components/site/traffic-tracker";
 import { getI18n } from "@/shared/i18n/server";
 import { getCurrentUser } from "@/backend/auth/session";
 import { getFooterData } from "@/backend/site-data";
@@ -14,6 +15,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <SiteFooter data={footer} />
+      <TrafficTracker />
     </>
   );
 }

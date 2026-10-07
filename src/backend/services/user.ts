@@ -5,7 +5,9 @@ import { prisma } from "@/backend/db";
 import { getDummyHash, hashPassword, verifyPassword } from "@/backend/auth/password";
 import { AppError } from "@/backend/http";
 
-export async function registerUser(input: z.infer<typeof registerSchema>) {
+type RegisterInput = Omit<z.infer<typeof registerSchema>, "confirmPassword">;
+
+export async function registerUser(input: RegisterInput, attribution?: { source: string; campaign: string | null } | null) {
   const exists = await prisma.user.findUnique({ where: { email: input.email }, select: { id: true } });
   if (exists) throw new AppError(409, "errors.emailTaken", { email: "errors.emailTaken" });
   const passwordHash = await hashPassword(input.password);
@@ -19,6 +21,8 @@ export async function registerUser(input: z.infer<typeof registerSchema>) {
         phone: input.phone,
         referralSource: input.referralSource,
         referralOther: input.referralSource === "OTHER" ? (input.referralOther ?? null) : null,
+        signupSource: attribution?.source ?? null,
+        signupCampaign: attribution?.campaign ?? null,
         role: "CUSTOMER", // never taken from the request
       },
       select: { id: true, fullName: true, email: true, role: true },
@@ -39,4 +43,9 @@ export async function authenticate(email: string, password: string) {
   if (!ok) throw new AppError(401, "errors.invalidCredentials");
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   return { id: user.id, fullName: user.fullName, email: user.email, role: user.role };
+}
+
+/** Removes an account created during a checkout that then failed (nothing else is attached yet). */
+export async function discardNewAccount(userId: string) {
+  await prisma.user.deleteMany({ where: { id: userId, orders: { none: {} } } });
 }

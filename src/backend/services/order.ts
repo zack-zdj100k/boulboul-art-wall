@@ -203,7 +203,7 @@ export async function findGroupLead(tx: Tx, c: { userId: string | null; phone: s
   return candidates.find((o) => norm(o.commune) === norm(c.commune)) ?? null;
 }
 
-export async function createOrder(input: CreateOrderInput, opts: { userId: string | null; locale: Locale }) {
+export async function createOrder(input: CreateOrderInput, opts: { userId: string | null; locale: Locale; attribution?: { source: string; campaign: string | null } | null }) {
   const wilaya = getWilaya(input.customer.wilayaCode);
   if (!wilaya) throw badRequest("validation.wilaya", { "customer.wilayaCode": "validation.wilaya" });
   const method: DeliveryMethod = input.customer.deliveryMethod ?? "HOME";
@@ -240,6 +240,8 @@ export async function createOrder(input: CreateOrderInput, opts: { userId: strin
         total: totals.total,
         status: "PENDING",
         locale: opts.locale,
+        trafficSource: opts.attribution?.source ?? null,
+        trafficCampaign: opts.attribution?.campaign ?? null,
         items: {
           create: quote.items.map((i) => ({
             productId: i.productId,

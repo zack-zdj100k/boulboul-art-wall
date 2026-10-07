@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, FileText, RotateCcw, Image as ImageIcon, LayoutDashboard, LogOut, MessageSquare, Package, Palette, Settings, ShoppingBag, Tags, Users } from "lucide-react";
+import { BarChart3, ExternalLink, FileText, RotateCcw, Image as ImageIcon, LayoutDashboard, LogOut, MessageSquare, Package, Palette, Settings, ShoppingBag, Tags, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BrandMark } from "@/frontend/components/site/brand";
@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/utils";
 
 const ITEMS = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+  { href: "/admin/analytics", label: "Réseaux sociaux", icon: BarChart3 },
   { href: "/admin/orders", label: "Commandes", icon: ShoppingBag, badge: "orders" },
   { href: "/admin/products", label: "Produits", icon: Package },
   { href: "/admin/categories", label: "Catégories", icon: Tags },
