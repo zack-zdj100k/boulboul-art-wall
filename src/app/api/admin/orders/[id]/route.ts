@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { orderStatusSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, notFound, parseJson } from "@/server/http";
-import { deleteOrder, updateOrderStatus } from "@/server/services/order";
+import { orderStatusSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, notFound, parseJson } from "@/backend/http";
+import { deleteOrder, updateOrderStatus } from "@/backend/services/order";
 
 export const GET = adminRoute<{ id: string }>(async (_req, { params }) => {
   const order = await prisma.order.findUnique({

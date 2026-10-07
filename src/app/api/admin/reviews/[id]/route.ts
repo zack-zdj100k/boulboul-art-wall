@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { reviewModerationSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { audit } from "@/server/services/audit";
-import { moderateReview } from "@/server/services/review";
+import { reviewModerationSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { audit } from "@/backend/services/audit";
+import { moderateReview } from "@/backend/services/review";
 
 export const PATCH = adminRoute<{ id: string }>(async (req, { params, user }) => {
   const input = await parseJson(req, reviewModerationSchema);

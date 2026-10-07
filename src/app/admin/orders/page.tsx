@@ -1,13 +1,13 @@
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
-import { DeleteOrderButton } from "@/components/admin/delete-order-button";
-import { CUSTOM_STATUS_FR, Empty, ORDER_STATUS_FR, PageHeader, StatusBadge, Table } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { cn } from "@/lib/utils";
-import { searchAllOrders } from "@/server/services/admin-queries";
+import { DeleteOrderButton } from "@/frontend/components/admin/delete-order-button";
+import { CUSTOM_STATUS_FR, Empty, ORDER_STATUS_FR, PageHeader, StatusBadge, Table } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { cn } from "@/shared/lib/utils";
+import { searchAllOrders } from "@/backend/services/admin-queries";
 
 export const metadata = { title: "Commandes" };
 

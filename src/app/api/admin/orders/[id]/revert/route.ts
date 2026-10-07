@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminRoute, parseJson } from "@/server/http";
-import { revertOrderStatus } from "@/server/services/order";
+import { adminRoute, parseJson } from "@/backend/http";
+import { revertOrderStatus } from "@/backend/services/order";
 
 /** Go back to the previous status (mistake). Never re-sends the confirmation email. */
 export const POST = adminRoute<{ id: string }>(async (req, { params, user }) => {

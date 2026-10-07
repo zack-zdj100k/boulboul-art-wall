@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { customOrderSchema } from "@/lib/validation";
-import { prisma } from "@/server/db";
-import { clientIp, parseJson, publicRoute, unauthorized } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { createCustomOrder } from "@/server/services/custom-order";
+import { customOrderSchema } from "@/shared/lib/validation";
+import { prisma } from "@/backend/db";
+import { clientIp, parseJson, publicRoute, unauthorized } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { createCustomOrder } from "@/backend/services/custom-order";
 
 export const POST = publicRoute(async (req, { user }) => {
   rateLimit(`custom:${clientIp(req)}`, 6, 15 * 60_000);

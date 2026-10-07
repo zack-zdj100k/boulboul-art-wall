@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { configurationSchema } from "@/lib/validation";
-import { clientIp, parseJson, publicRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { quoteOrder } from "@/server/services/order";
+import { configurationSchema } from "@/shared/lib/validation";
+import { clientIp, parseJson, publicRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { quoteOrder } from "@/backend/services/order";
 
 const schema = z.object({
   items: z.array(configurationSchema).min(1).max(20),

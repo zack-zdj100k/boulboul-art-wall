@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { productAdminSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { createProduct } from "@/server/services/product-admin";
+import { productAdminSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { createProduct } from "@/backend/services/product-admin";
 
 export const GET = adminRoute(async () => {
   const products = await prisma.product.findMany({

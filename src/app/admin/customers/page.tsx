@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { z } from "zod";
-import { CustomerActions } from "@/components/admin/customer-actions";
-import { Empty, PageHeader, Table } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
-import { formatDate } from "@/i18n/config";
-import { cn } from "@/lib/utils";
-import { requireAdmin } from "@/server/auth/guards";
-import { listCustomers } from "@/server/services/admin-queries";
+import { CustomerActions } from "@/frontend/components/admin/customer-actions";
+import { Empty, PageHeader, Table } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { formatDate } from "@/shared/i18n/config";
+import { cn } from "@/shared/lib/utils";
+import { requireAdmin } from "@/backend/auth/guards";
+import { listCustomers } from "@/backend/services/admin-queries";
 
 export const metadata = { title: "Clients" };
 

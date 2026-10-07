@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { env } from "@/server/env";
-import { AppError, adminRoute, parseJson } from "@/server/http";
-import { sendTestEmail } from "@/server/email/service";
-import { getEmailSettings } from "@/server/services/settings";
+import { env } from "@/backend/env";
+import { AppError, adminRoute, parseJson } from "@/backend/http";
+import { sendTestEmail } from "@/backend/email/service";
+import { getEmailSettings } from "@/backend/services/settings";
 
 /** Sends a test email to the given address, or to the first notification recipient. */
 export const POST = adminRoute(async (req) => {

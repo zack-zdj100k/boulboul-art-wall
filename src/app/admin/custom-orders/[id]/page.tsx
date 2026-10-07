@@ -1,12 +1,12 @@
 import { Download } from "lucide-react";
-import { describeExtra, type ExtraSnapshot } from "@/lib/options";
+import { describeExtra, type ExtraSnapshot } from "@/shared/lib/options";
 import { notFound } from "next/navigation";
-import { CustomOrderEditor } from "@/components/admin/custom-order-editor";
-import { DeleteOrderButton } from "@/components/admin/delete-order-button";
-import { CUSTOM_STATUS_FR, PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { prisma } from "@/server/db";
-import { mediaUrl } from "@/server/storage";
+import { CustomOrderEditor } from "@/frontend/components/admin/custom-order-editor";
+import { DeleteOrderButton } from "@/frontend/components/admin/delete-order-button";
+import { CUSTOM_STATUS_FR, PageHeader, Panel, StatusBadge } from "@/frontend/components/admin/ui";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { prisma } from "@/backend/db";
+import { mediaUrl } from "@/backend/storage";
 
 export const metadata = { title: "Demande sur mesure" };
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { sanitizeFilename, sniffImageMime } from "@/server/services/media";
+import { sanitizeFilename, sniffImageMime } from "@/backend/services/media";
 
 describe("Upload validation", () => {
   it("detects real image types from their bytes", async () => {

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { frameAdminSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { saveFrame } from "@/server/services/catalog-admin";
+import { frameAdminSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { saveFrame } from "@/backend/services/catalog-admin";
 
 export const GET = adminRoute(async () => NextResponse.json({ items: await prisma.frameOption.findMany({ orderBy: { sortOrder: "asc" } }) }));
 

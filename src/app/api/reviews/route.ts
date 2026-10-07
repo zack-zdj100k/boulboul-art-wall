@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { reviewSchema } from "@/lib/validation";
-import { badRequest, parseJson, publicRoute, unauthorized } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { listProductReviews, submitReview } from "@/server/services/review";
+import { reviewSchema } from "@/shared/lib/validation";
+import { badRequest, parseJson, publicRoute, unauthorized } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { listProductReviews, submitReview } from "@/backend/services/review";
 
 export const GET = publicRoute(async (req) => {
   const productId = req.nextUrl.searchParams.get("productId");

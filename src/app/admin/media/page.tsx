@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { z } from "zod";
-import { MediaLibrary } from "@/components/admin/media-library";
-import { Empty, PageHeader } from "@/components/admin/ui";
-import { Pagination } from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
-import { listMedia } from "@/server/services/admin-queries";
+import { MediaLibrary } from "@/frontend/components/admin/media-library";
+import { Empty, PageHeader } from "@/frontend/components/admin/ui";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { cn } from "@/shared/lib/utils";
+import { listMedia } from "@/backend/services/admin-queries";
 
 export const metadata = { title: "Médias" };
 

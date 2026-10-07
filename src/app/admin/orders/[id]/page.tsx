@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { DeleteOrderButton } from "@/components/admin/delete-order-button";
-import { RetryEmailButton } from "@/components/admin/order-actions";
+import { DeleteOrderButton } from "@/frontend/components/admin/delete-order-button";
+import { RetryEmailButton } from "@/frontend/components/admin/order-actions";
 import {
   CustomerQuickActions,
   DeliveryFeePanel,
@@ -13,14 +13,14 @@ import {
   OrderStatusPanel,
   ReturnsPanel,
   SeparateDeliveryButton,
-} from "@/components/admin/order-manager";
-import { ORDER_STATUS_FR, PageHeader, Panel, RETURN_STATUS_FR, RETURN_TYPE_FR, StatusBadge } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { describeExtra, type ExtraSnapshot } from "@/lib/options";
-import { prisma } from "@/server/db";
-import { EDITABLE_STATUSES, ORDER_TRANSITIONS, previousStatus } from "@/server/services/order";
-import { nextReturnStatuses, returnableQuantities } from "@/server/services/returns";
+} from "@/frontend/components/admin/order-manager";
+import { ORDER_STATUS_FR, PageHeader, Panel, RETURN_STATUS_FR, RETURN_TYPE_FR, StatusBadge } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { describeExtra, type ExtraSnapshot } from "@/shared/lib/options";
+import { prisma } from "@/backend/db";
+import { EDITABLE_STATUSES, ORDER_TRANSITIONS, previousStatus } from "@/backend/services/order";
+import { nextReturnStatuses, returnableQuantities } from "@/backend/services/returns";
 
 export const metadata = { title: "Commande" };
 

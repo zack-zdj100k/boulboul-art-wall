@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { loginSchema } from "@/lib/validation";
-import { createSession } from "@/server/auth/session";
-import { clientIp, parseJson, publicRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { authenticate } from "@/server/services/user";
+import { loginSchema } from "@/shared/lib/validation";
+import { createSession } from "@/backend/auth/session";
+import { clientIp, parseJson, publicRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { authenticate } from "@/backend/services/user";
 
 export const POST = publicRoute(async (req) => {
   const input = await parseJson(req, loginSchema);

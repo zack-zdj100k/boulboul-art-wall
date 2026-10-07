@@ -1,5 +1,5 @@
-import { ButtonLink } from "@/components/ui/button";
-import { getI18n } from "@/i18n/server";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { getI18n } from "@/shared/i18n/server";
 
 export default async function NotFound() {
   const { t } = await getI18n();

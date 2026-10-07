@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { z } from "zod";
-import { Empty, PageHeader, RETURN_STATUS_FR, RETURN_TYPE_FR, StatusBadge, Table } from "@/components/admin/ui";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { RETURN_STATUSES } from "@/lib/admin-validation";
-import { cn } from "@/lib/utils";
-import { listReturnRequests } from "@/server/services/returns";
+import { Empty, PageHeader, RETURN_STATUS_FR, RETURN_TYPE_FR, StatusBadge, Table } from "@/frontend/components/admin/ui";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { RETURN_STATUSES } from "@/shared/lib/admin-validation";
+import { cn } from "@/shared/lib/utils";
+import { listReturnRequests } from "@/backend/services/returns";
 
 export const metadata = { title: "Retours & échanges" };
 

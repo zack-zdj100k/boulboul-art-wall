@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminRoute, parseJson } from "@/server/http";
-import { audit } from "@/server/services/audit";
-import { getAllSettings, updateSettings } from "@/server/services/settings";
+import { adminRoute, parseJson } from "@/backend/http";
+import { audit } from "@/backend/services/audit";
+import { getAllSettings, updateSettings } from "@/backend/services/settings";
 
 export const GET = adminRoute(async () => NextResponse.json({ settings: await getAllSettings() }));
 

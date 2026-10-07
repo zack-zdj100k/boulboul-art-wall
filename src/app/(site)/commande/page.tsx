@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { CartView } from "@/components/cart/cart-view";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
-import { prisma } from "@/server/db";
+import { CartView } from "@/frontend/components/cart/cart-view";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
+import { prisma } from "@/backend/db";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AuthShell } from "@/components/account/auth-shell";
-import { LoginForm } from "@/components/account/login-form";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
+import { AuthShell } from "@/frontend/components/account/auth-shell";
+import { LoginForm } from "@/frontend/components/account/login-form";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
 
 export const metadata: Metadata = { title: "Connexion", robots: { index: false } };
 

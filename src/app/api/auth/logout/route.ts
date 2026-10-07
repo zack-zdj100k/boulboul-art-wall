@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { destroySession } from "@/server/auth/session";
-import { publicRoute } from "@/server/http";
+import { destroySession } from "@/backend/auth/session";
+import { publicRoute } from "@/backend/http";
 
 export const POST = publicRoute(async () => {
   await destroySession();

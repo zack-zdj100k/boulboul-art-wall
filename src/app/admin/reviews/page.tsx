@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { z } from "zod";
-import { AddReviewButton, ReviewActions } from "@/components/admin/review-admin";
-import { Empty, PageHeader, REVIEW_STATUS_FR, StatusBadge } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { Pagination } from "@/components/ui/pagination";
-import { Stars } from "@/components/ui/stars";
-import { formatDate } from "@/i18n/config";
-import { cn } from "@/lib/utils";
-import { prisma } from "@/server/db";
-import { listReviews } from "@/server/services/admin-queries";
+import { AddReviewButton, ReviewActions } from "@/frontend/components/admin/review-admin";
+import { Empty, PageHeader, REVIEW_STATUS_FR, StatusBadge } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { Stars } from "@/frontend/components/ui/stars";
+import { formatDate } from "@/shared/i18n/config";
+import { cn } from "@/shared/lib/utils";
+import { prisma } from "@/backend/db";
+import { listReviews } from "@/backend/services/admin-queries";
 
 export const metadata = { title: "Avis" };
 

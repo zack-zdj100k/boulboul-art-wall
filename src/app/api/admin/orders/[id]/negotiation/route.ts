@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { negotiationSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { negotiateOrder } from "@/server/services/order";
+import { negotiationSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { negotiateOrder } from "@/backend/services/order";
 
 /** Set the negotiated discount of this order (recorded in its negotiation history). */
 export const POST = adminRoute<{ id: string }>(async (req, { params, user }) => {

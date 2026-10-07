@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminRoute, badRequest } from "@/server/http";
-import { listMedia } from "@/server/services/admin-queries";
-import { audit } from "@/server/services/audit";
-import { toMediaDto, uploadImage } from "@/server/services/media";
+import { adminRoute, badRequest } from "@/backend/http";
+import { listMedia } from "@/backend/services/admin-queries";
+import { audit } from "@/backend/services/audit";
+import { toMediaDto, uploadImage } from "@/backend/services/media";
 
 const schema = z.object({ page: z.coerce.number().int().min(1).optional(), visibility: z.enum(["PUBLIC", "PRIVATE"]).optional() });
 

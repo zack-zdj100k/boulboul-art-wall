@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/server/db";
-import { purchasableWhere } from "@/server/services/product";
+import { prisma } from "@/backend/db";
+import { purchasableWhere } from "@/backend/services/product";
 
 export const dynamic = "force-dynamic";
 

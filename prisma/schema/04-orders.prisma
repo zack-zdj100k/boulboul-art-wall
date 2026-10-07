@@ -1,0 +1,150 @@
+// Orders: price snapshot per item, status history, negotiations, grouped deliveries.
+
+// Where an order's official price came from (see src/shared/lib/pricing.ts).
+enum PricingSource {
+  PRESET // a measure created by the admin, with its exact price
+  SUR_MESURE // any other measure: reference price ± step price per 10 cm
+}
+
+enum OrderStatus {
+  PENDING
+  CONTACTING
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryMethod {
+  HOME // à domicile
+  STOP_DESK // point relais du transporteur
+}
+
+enum AdjustmentKind {
+  NEGOTIATION // per-order discount agreed with the customer
+  DIMENSION_CHANGE // dimensions changed by a manager, price looked up again
+  DELIVERY_FEE // delivery fee set or changed by a manager
+}
+
+model Order {
+  id                 String         @id @default(cuid())
+  orderNumber        String         @unique // BAW-2026-000001
+  publicToken        String         @unique // lets a guest view their own confirmation page
+  userId             String?
+  user               User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName       String
+  email              String
+  phone              String
+  wilayaCode         String
+  wilayaName         String
+  commune            String
+  address            String
+  notes              String?
+  // subtotal = items after promotion (+ options); total = subtotal − negotiatedDiscount + deliveryFee
+  subtotal           Int
+  negotiatedDiscount Int            @default(0) // belongs to this order only — the price tables never change
+  deliveryFee        Int? // null = to be confirmed by Boulboul (no delivery rule configured)
+  deliveryMethod     DeliveryMethod @default(HOME)
+  // Same customer ordered again before the previous order was delivered: one parcel, the delivery
+  // is charged once, on the lead order (this order's fee is 0).
+  shipsWithId        String?
+  shipsWith          Order?         @relation("ShipsWith", fields: [shipsWithId], references: [id], onDelete: SetNull)
+  followers          Order[]        @relation("ShipsWith")
+  total              Int
+  currency           String         @default("DZD")
+  status             OrderStatus    @default(PENDING)
+  managerNotes       String? // private to admins
+  locale             String         @default("fr")
+  isDemo             Boolean        @default(false)
+  confirmedAt        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  items       OrderItem[]
+  history     OrderStatusHistory[]
+  adjustments OrderPriceAdjustment[]
+  returns     ReturnRequest[]
+  emails      EmailLog[]
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([email])
+}
+
+// Price snapshot: everything needed to understand the purchase is copied here, so later
+// product/price-table edits never change historical orders.
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName     String
+  productSlug     String
+  productImageUrl String?
+  widthCm         Int
+  heightCm        Int
+  frameId         String?
+  frameName       String?
+  color           String?
+  extras          Json     @default("[]") // [{ id, name, price, color?, note? }]
+
+  pricingType         PricingSource? // null only for orders created before the pricing tables
+  pricingRefId        String? // id of the ProductMeasure used (PRESET)
+  pricingLabel        String? // special-measure label at order time
+  officialPrice       Int // configured price for the dimensions (per unit)
+  promotionType       PromotionType?
+  promotionValue      Int?
+  promotionDiscount   Int             @default(0) // per unit
+  priceAfterPromotion Int // per unit
+  optionsPrice        Int             @default(0) // frame + extras, per unit
+  quantity            Int
+  unitPrice           Int // priceAfterPromotion + optionsPrice
+  totalPrice          Int // unitPrice × quantity
+  pricingBreakdown    Json
+  returns             ReturnRequest[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id          String       @id @default(cuid())
+  orderId     String
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  changedById String?
+  changedBy   User?        @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// Every manager change to an order's price (negotiation, dimension change, delivery fee).
+// Append-only: this is the complete negotiation history of the order.
+model OrderPriceAdjustment {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind            AdjustmentKind
+  previousPrice   Int // final product price before the change (subtotal − negotiated discount)
+  newPrice        Int // final product price after the change
+  discountAmount  Int? // NEGOTIATION: negotiated discount now applied to the order
+  discountPercent Float? // NEGOTIATION: when entered as a percentage
+  previousTotal   Int
+  newTotal        Int
+  details         Json? // before/after dimensions, delivery fee, price snapshot…
+  note            String?
+  actorId         String?
+  actor           User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// Per-year sequence for human-readable order numbers.
+model Counter {
+  key   String @id // e.g. "order:2026", "custom:2026"
+  value Int    @default(0)
+}

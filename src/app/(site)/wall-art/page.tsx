@@ -4,17 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { z } from "zod";
-import { CatalogFilters } from "@/components/product/catalog-filters";
-import { ProductTile } from "@/components/shop/product-tile";
-import { ShopHero } from "@/components/shop/shop-hero";
-import { BrandMark } from "@/components/site/brand";
-import { ButtonLink } from "@/components/ui/button";
-import { Pagination } from "@/components/ui/pagination";
-import { Reveal } from "@/components/ui/reveal";
-import { formatPrice } from "@/i18n/config";
-import { getI18n } from "@/i18n/server";
-import { cn } from "@/lib/utils";
-import { listActiveCategories, listCatalog, listFeatured } from "@/server/services/product";
+import { CatalogFilters } from "@/frontend/components/product/catalog-filters";
+import { ProductTile } from "@/frontend/components/shop/product-tile";
+import { ShopHero } from "@/frontend/components/shop/shop-hero";
+import { BrandMark } from "@/frontend/components/site/brand";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { formatPrice } from "@/shared/i18n/config";
+import { getI18n } from "@/shared/i18n/server";
+import { cn } from "@/shared/lib/utils";
+import { listActiveCategories, listCatalog, listFeatured } from "@/backend/services/product";
 
 const querySchema = z.object({
   q: z.string().max(80).optional().catch(undefined),

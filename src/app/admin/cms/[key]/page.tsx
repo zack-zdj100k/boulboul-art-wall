@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { CmsEditor } from "@/components/admin/cms-editor";
+import { CmsEditor } from "@/frontend/components/admin/cms-editor";
 import { ExternalLink } from "lucide-react";
-import { PageHeader } from "@/components/admin/ui";
-import { CMS_PUBLIC_PATHS } from "@/lib/cms-schema";
-import { getSectionDef } from "@/lib/cms-schema";
-import { getSection } from "@/server/services/cms";
+import { PageHeader } from "@/frontend/components/admin/ui";
+import { CMS_PUBLIC_PATHS } from "@/shared/lib/cms-schema";
+import { getSectionDef } from "@/shared/lib/cms-schema";
+import { getSection } from "@/backend/services/cms";
 
 export const metadata = { title: "Modifier le contenu" };
 

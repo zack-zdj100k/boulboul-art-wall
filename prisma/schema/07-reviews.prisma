@@ -1,0 +1,37 @@
+// Customer reviews (moderated).
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum ReviewSource {
+  CUSTOMER // submitted on the website by a signed-in customer
+  ADMIN // real feedback transcribed by an admin (e.g. received by message)
+}
+
+model Review {
+  id               String       @id @default(cuid())
+  productId        String?
+  product          Product?     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?        @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  authorName       String
+  rating           Int
+  comment          String
+  status           ReviewStatus @default(PENDING)
+  source           ReviewSource @default(CUSTOMER)
+  verifiedPurchase Boolean      @default(false)
+  isFeatured       Boolean      @default(false) // shown in the home testimonials columns
+  moderatedById    String?
+  moderatedBy      User?        @relation("ReviewModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  moderatedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([productId, userId])
+  @@index([status, productId])
+  @@index([status, isFeatured])
+}

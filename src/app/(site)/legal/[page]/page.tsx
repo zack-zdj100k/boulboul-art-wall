@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getI18n } from "@/i18n/server";
-import { getLegal } from "@/server/cms-content";
+import { getI18n } from "@/shared/i18n/server";
+import { getLegal } from "@/backend/cms-content";
 
 const PAGES = { terms: "legal.terms", privacy: "legal.privacy", returns: "legal.returns" } as const;
 

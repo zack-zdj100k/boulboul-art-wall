@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminReviewSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { listReviews } from "@/server/services/admin-queries";
-import { audit } from "@/server/services/audit";
+import { adminReviewSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { listReviews } from "@/backend/services/admin-queries";
+import { audit } from "@/backend/services/audit";
 
 const schema = z.object({ status: z.enum(["PENDING", "APPROVED", "REJECTED", "HIDDEN"]).optional(), page: z.coerce.number().int().min(1).optional() });
 

@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductCard } from "@/components/product/product-card";
-import { ProductConfigurator } from "@/components/product/product-configurator";
-import { ProductGallery } from "@/components/product/product-gallery";
-import { ReviewForm } from "@/components/product/review-form";
-import { Badge } from "@/components/ui/badge";
-import { Reveal } from "@/components/ui/reveal";
-import { Stars } from "@/components/ui/stars";
-import { formatDate } from "@/i18n/config";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
-import { prisma } from "@/server/db";
-import { getContactHref } from "@/server/site-data";
-import { getProductDetail, listRelated } from "@/server/services/product";
-import { listProductReviews } from "@/server/services/review";
+import { ProductCard } from "@/frontend/components/product/product-card";
+import { ProductConfigurator } from "@/frontend/components/product/product-configurator";
+import { ProductGallery } from "@/frontend/components/product/product-gallery";
+import { ReviewForm } from "@/frontend/components/product/review-form";
+import { Badge } from "@/frontend/components/ui/badge";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { Stars } from "@/frontend/components/ui/stars";
+import { formatDate } from "@/shared/i18n/config";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
+import { prisma } from "@/backend/db";
+import { getContactHref } from "@/backend/site-data";
+import { getProductDetail, listRelated } from "@/backend/services/product";
+import { listProductReviews } from "@/backend/services/review";
 
 export async function generateMetadata(props: PageProps<"/wall-art/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;

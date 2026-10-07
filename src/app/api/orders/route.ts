@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createOrderSchema } from "@/lib/validation";
-import { getLocale } from "@/i18n/server";
-import { prisma } from "@/server/db";
-import { clientIp, parseJson, publicRoute, unauthorized, userRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { createOrder } from "@/server/services/order";
+import { createOrderSchema } from "@/shared/lib/validation";
+import { getLocale } from "@/shared/i18n/server";
+import { prisma } from "@/backend/db";
+import { clientIp, parseJson, publicRoute, unauthorized, userRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { createOrder } from "@/backend/services/order";
 
 /** Placing an order requires a Boulboul account (401 for visitors who are not signed in). */
 export const POST = userRoute(async (req, { user }) => {

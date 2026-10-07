@@ -4,7 +4,7 @@
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "../src/backend/generated/prisma/client";
 
 const email = process.argv[2]?.trim().toLowerCase();
 if (!email) {

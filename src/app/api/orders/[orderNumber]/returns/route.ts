@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { RETURN_REASONS } from "@/lib/returns";
-import { returnRequestSchema } from "@/lib/validation";
-import { canAccessOrder } from "@/server/auth/order-access";
-import { prisma } from "@/server/db";
-import { clientIp, notFound, parseJson, publicRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { cancelOwnReturnRequest, createReturnRequest } from "@/server/services/returns";
+import { RETURN_REASONS } from "@/shared/lib/returns";
+import { returnRequestSchema } from "@/shared/lib/validation";
+import { canAccessOrder } from "@/backend/auth/order-access";
+import { prisma } from "@/backend/db";
+import { clientIp, notFound, parseJson, publicRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { cancelOwnReturnRequest, createReturnRequest } from "@/backend/services/returns";
 
 async function ownOrder(orderNumber: string, user: Parameters<typeof canAccessOrder>[1], token?: string) {
   const order = await prisma.order.findUnique({ where: { orderNumber: decodeURIComponent(orderNumber) }, select: { id: true, userId: true, publicToken: true } });

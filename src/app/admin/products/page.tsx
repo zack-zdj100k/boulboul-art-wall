@@ -1,14 +1,14 @@
 import { AlertTriangle, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ProductRowActions } from "@/components/admin/product-row-actions";
-import { Empty, PageHeader, Table } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
-import { formatPrice } from "@/i18n/config";
-import { prisma } from "@/server/db";
-import { isSurMesureConfigured, startingPrice, surMesureFromProduct } from "@/server/services/pricing";
-import { mediaUrl } from "@/server/storage";
+import { ProductRowActions } from "@/frontend/components/admin/product-row-actions";
+import { Empty, PageHeader, Table } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { formatPrice } from "@/shared/i18n/config";
+import { prisma } from "@/backend/db";
+import { isSurMesureConfigured, startingPrice, surMesureFromProduct } from "@/backend/services/pricing";
+import { mediaUrl } from "@/backend/storage";
 
 export const metadata = { title: "Produits" };
 

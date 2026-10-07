@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminRoute, parseJson } from "@/server/http";
-import { getSection, saveDraft } from "@/server/services/cms";
+import { adminRoute, parseJson } from "@/backend/http";
+import { getSection, saveDraft } from "@/backend/services/cms";
 
 export const GET = adminRoute<{ key: string }>(async (_req, { params }) => NextResponse.json(await getSection(params.key)));
 

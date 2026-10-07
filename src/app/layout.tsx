@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, IBM_Plex_Sans_Arabic, Manrope } from "next/font/google";
-import { Providers } from "@/components/site/providers";
-import { getI18n } from "@/i18n/server";
+import { Providers } from "@/frontend/components/site/providers";
+import { getI18n } from "@/shared/i18n/server";
 import "./globals.css";
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", axes: ["opsz", "SOFT"], display: "swap" });

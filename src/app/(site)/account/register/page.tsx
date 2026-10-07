@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AuthShell } from "@/components/account/auth-shell";
-import { RegisterForm } from "@/components/account/register-form";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
+import { AuthShell } from "@/frontend/components/account/auth-shell";
+import { RegisterForm } from "@/frontend/components/account/register-form";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
 
 export const metadata: Metadata = { title: "Créer un compte", robots: { index: false } };
 

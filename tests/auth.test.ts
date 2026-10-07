@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { hashPassword, verifyPassword } from "@/server/auth/password";
-import { prisma } from "@/server/db";
-import { memoryProvider } from "@/server/email/providers";
-import { authenticate, registerUser } from "@/server/services/user";
-import { createOrder } from "@/server/services/order";
+import { hashPassword, verifyPassword } from "@/backend/auth/password";
+import { prisma } from "@/backend/db";
+import { memoryProvider } from "@/backend/email/providers";
+import { authenticate, registerUser } from "@/backend/services/user";
+import { createOrder } from "@/backend/services/order";
 import { createProductFixture, createUser, customer, resetDb } from "./helpers";
 
 const session = vi.hoisted(() => ({ user: null as null | { id: string; email: string; fullName: string; role: "ADMIN" | "CUSTOMER" } }));
-vi.mock("@/server/auth/session", () => ({ getCurrentUser: async () => session.user }));
+vi.mock("@/backend/auth/session", () => ({ getCurrentUser: async () => session.user }));
 // Route handlers read the language cookie; outside a real request the locale is French.
-vi.mock("@/i18n/server", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/i18n/server")>()), getLocale: async () => "fr" }));
+vi.mock("@/shared/i18n/server", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/shared/i18n/server")>()), getLocale: async () => "fr" }));
 
 beforeEach(async () => {
   await resetDb();

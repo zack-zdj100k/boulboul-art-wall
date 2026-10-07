@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { adminRoute } from "@/server/http";
-import { listCustomOrders } from "@/server/services/admin-queries";
+import { adminRoute } from "@/backend/http";
+import { listCustomOrders } from "@/backend/services/admin-queries";
 
 const schema = z.object({
   q: z.string().max(100).optional(),

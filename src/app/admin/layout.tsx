@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AdminNav } from "@/components/admin/admin-nav";
-import { AdminShell } from "@/components/admin/admin-shell";
-import { requireAdmin } from "@/server/auth/guards";
-import { prisma } from "@/server/db";
+import { AdminNav } from "@/frontend/components/admin/admin-nav";
+import { AdminShell } from "@/frontend/components/admin/admin-shell";
+import { requireAdmin } from "@/backend/auth/guards";
+import { prisma } from "@/backend/db";
 
 export const metadata: Metadata = { title: { default: "Administration", template: "%s · Admin Boulboul" }, robots: { index: false, follow: false } };
 

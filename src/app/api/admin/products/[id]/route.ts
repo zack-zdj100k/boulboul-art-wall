@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { productAdminSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, notFound, parseJson } from "@/server/http";
-import { archiveProduct, deleteProductPermanently, updateProduct } from "@/server/services/product-admin";
+import { productAdminSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, notFound, parseJson } from "@/backend/http";
+import { archiveProduct, deleteProductPermanently, updateProduct } from "@/backend/services/product-admin";
 
 export const GET = adminRoute<{ id: string }>(async (_req, { params }) => {
   const product = await prisma.product.findUnique({

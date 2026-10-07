@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { customOrderAdminSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { deleteCustomOrder, updateCustomOrder } from "@/server/services/custom-order";
+import { customOrderAdminSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { deleteCustomOrder, updateCustomOrder } from "@/backend/services/custom-order";
 
 export const PATCH = adminRoute<{ id: string }>(async (req, { params, user }) => {
   const input = await parseJson(req, customOrderAdminSchema);

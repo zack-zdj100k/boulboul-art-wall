@@ -1,0 +1,28 @@
+// Uploaded images (public product images, private customer designs).
+
+enum MediaVisibility {
+  PUBLIC
+  PRIVATE // customer uploads: only admins (and the owner) can read them
+}
+
+model Media {
+  id           String          @id @default(cuid())
+  key          String          @unique // storage key, generated server-side
+  mime         String
+  size         Int
+  width        Int?
+  height       Int?
+  originalName String // sanitised, display only
+  alt          String?
+  visibility   MediaVisibility @default(PUBLIC)
+  uploadedById String?
+  uploadedBy   User?           @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime        @default(now())
+
+  productImages ProductImage[]
+  categories    Category[]
+  frames        FrameOption[]
+  customOrders  CustomOrder[]
+
+  @@index([visibility, createdAt])
+}

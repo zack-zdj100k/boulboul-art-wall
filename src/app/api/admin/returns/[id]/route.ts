@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { returnStatusSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { deleteReturnRequest, updateReturnStatus } from "@/server/services/returns";
+import { returnStatusSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { deleteReturnRequest, updateReturnStatus } from "@/backend/services/returns";
 
 export const PATCH = adminRoute<{ id: string }>(async (req, { params, user }) => {
   const input = await parseJson(req, returnStatusSchema);

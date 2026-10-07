@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { measureBulkSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { loadProductPricing } from "@/server/services/product-form";
-import { saveMeasures } from "@/server/services/product-pricing";
+import { measureBulkSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { loadProductPricing } from "@/backend/services/product-form";
+import { saveMeasures } from "@/backend/services/product-pricing";
 
 export const GET = adminRoute<{ id: string }>(async (_req, { params }) => NextResponse.json(await loadProductPricing(params.id)));
 

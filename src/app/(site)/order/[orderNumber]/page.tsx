@@ -1,17 +1,17 @@
 import { CheckCircle2 } from "lucide-react";
-import { describeExtra, type ExtraSnapshot } from "@/lib/options";
+import { describeExtra, type ExtraSnapshot } from "@/shared/lib/options";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ReturnRequestSection } from "@/components/order/return-request";
-import { ButtonLink } from "@/components/ui/button";
-import { Reveal } from "@/components/ui/reveal";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { getI18n } from "@/i18n/server";
-import { canAccessOrder } from "@/server/auth/order-access";
-import { getCurrentUser } from "@/server/auth/session";
-import { getLegal } from "@/server/cms-content";
-import { returnableQuantities } from "@/server/services/returns";
-import { prisma } from "@/server/db";
+import { ReturnRequestSection } from "@/frontend/components/order/return-request";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { getI18n } from "@/shared/i18n/server";
+import { canAccessOrder } from "@/backend/auth/order-access";
+import { getCurrentUser } from "@/backend/auth/session";
+import { getLegal } from "@/backend/cms-content";
+import { returnableQuantities } from "@/backend/services/returns";
+import { prisma } from "@/backend/db";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 

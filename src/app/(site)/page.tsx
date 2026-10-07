@@ -1,20 +1,20 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { CardHandGallery } from "@/components/home/card-hand-gallery";
-import { CollectionsShowcase } from "@/components/home/collections-showcase";
-import { CustomProcess } from "@/components/home/custom-process";
-import { HeroFan } from "@/components/home/hero-fan";
-import { TestimonialsColumns } from "@/components/home/testimonials-columns";
-import { ProductCard } from "@/components/product/product-card";
-import { FounderCard } from "@/components/site/founder-card";
-import { ButtonLink } from "@/components/ui/button";
-import { Reveal } from "@/components/ui/reveal";
-import { Section, SectionHeading } from "@/components/ui/section";
-import { formatPrice } from "@/i18n/config";
-import { getI18n } from "@/i18n/server";
-import { getHomeContent } from "@/server/cms-content";
-import { listActiveCategories, listCatalog, listFeatured } from "@/server/services/product";
-import { listTestimonials } from "@/server/services/review";
+import { CardHandGallery } from "@/frontend/components/home/card-hand-gallery";
+import { CollectionsShowcase } from "@/frontend/components/home/collections-showcase";
+import { CustomProcess } from "@/frontend/components/home/custom-process";
+import { HeroFan } from "@/frontend/components/home/hero-fan";
+import { TestimonialsColumns } from "@/frontend/components/home/testimonials-columns";
+import { ProductCard } from "@/frontend/components/product/product-card";
+import { FounderCard } from "@/frontend/components/site/founder-card";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { Section, SectionHeading } from "@/frontend/components/ui/section";
+import { formatPrice } from "@/shared/i18n/config";
+import { getI18n } from "@/shared/i18n/server";
+import { getHomeContent } from "@/backend/cms-content";
+import { listActiveCategories, listCatalog, listFeatured } from "@/backend/services/product";
+import { listTestimonials } from "@/backend/services/review";
 
 export default async function HomePage() {
   const { t, locale, messages } = await getI18n();

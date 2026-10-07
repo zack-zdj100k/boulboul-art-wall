@@ -1,10 +1,10 @@
 import { ExternalLink, Pencil } from "lucide-react";
 import Link from "next/link";
-import { CMS_PUBLIC_PATHS } from "@/lib/cms-schema";
-import { PageHeader } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/i18n/config";
-import { listSections } from "@/server/services/cms";
+import { CMS_PUBLIC_PATHS } from "@/shared/lib/cms-schema";
+import { PageHeader } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { formatDate } from "@/shared/i18n/config";
+import { listSections } from "@/backend/services/cms";
 
 export const metadata = { title: "Contenu (CMS)" };
 

@@ -1,0 +1,29 @@
+// E-mail notifications log.
+
+enum EmailType {
+  NEW_ORDER_ADMIN
+  ORDER_CONFIRMED_CUSTOMER
+  ORDER_DELIVERED_CUSTOMER
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+}
+
+model EmailLog {
+  id                String      @id @default(cuid())
+  type              EmailType
+  orderId           String?
+  order             Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  to                String
+  subject           String
+  status            EmailStatus
+  provider          String
+  providerMessageId String?
+  error             String?
+  createdAt         DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([status, createdAt])
+}

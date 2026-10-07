@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { deleteMedia } from "@/server/services/media";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { deleteMedia } from "@/backend/services/media";
 
 export const PATCH = adminRoute<{ id: string }>(async (req, { params }) => {
   const { alt } = await parseJson(req, z.object({ alt: z.string().trim().max(200) }));

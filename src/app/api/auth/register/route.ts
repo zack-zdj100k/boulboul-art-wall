@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { registerSchema } from "@/lib/validation";
-import { createSession } from "@/server/auth/session";
-import { clientIp, parseJson, publicRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { registerUser } from "@/server/services/user";
+import { registerSchema } from "@/shared/lib/validation";
+import { createSession } from "@/backend/auth/session";
+import { clientIp, parseJson, publicRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { registerUser } from "@/backend/services/user";
 
 export const POST = publicRoute(async (req) => {
   rateLimit(`register:${clientIp(req)}`, 5, 15 * 60_000);

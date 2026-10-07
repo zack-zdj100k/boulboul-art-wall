@@ -1,0 +1,11 @@
+// Boulboul Art Wall — database schema, split by domain (files are read in name order).
+// Money is stored as integer Algerian dinars (DZD has no fractional unit in practice).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/backend/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

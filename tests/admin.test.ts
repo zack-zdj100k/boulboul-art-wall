@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { measureSchema, productAdminSchema, surMesureSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { getPublished, publishSection, saveDraft } from "@/server/services/cms";
-import { createOrder } from "@/server/services/order";
-import { getMeasurePrice, getProductPrice, getSurMesurePrice } from "@/server/services/pricing";
-import { archiveProduct, createProduct, deleteProductPermanently, updateProduct } from "@/server/services/product-admin";
-import { deleteMeasure, saveMeasures, updateMeasure, updateSurMesure } from "@/server/services/product-pricing";
+import { measureSchema, productAdminSchema, surMesureSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { getPublished, publishSection, saveDraft } from "@/backend/services/cms";
+import { createOrder } from "@/backend/services/order";
+import { getMeasurePrice, getProductPrice, getSurMesurePrice } from "@/backend/services/pricing";
+import { archiveProduct, createProduct, deleteProductPermanently, updateProduct } from "@/backend/services/product-admin";
+import { deleteMeasure, saveMeasures, updateMeasure, updateSurMesure } from "@/backend/services/product-pricing";
 import { getStats } from "./stats-helper";
 import { createProductFixture, createUser, customer, resetDb } from "./helpers";
 
@@ -95,7 +95,7 @@ describe("Product pricing", () => {
 
 describe("Order deletion", () => {
   it("deletes an order with its items and history but keeps an audit trace", async () => {
-    const { deleteOrder } = await import("@/server/services/order");
+    const { deleteOrder } = await import("@/backend/services/order");
     const admin = await createUser("ADMIN");
     const { product } = await createProductFixture();
     const { order } = await createOrder({ items: [{ productId: product.id, widthCm: 100, heightCm: 100, extraIds: [], quantity: 1 }], customer }, { userId: null, locale: "fr" });
@@ -109,7 +109,7 @@ describe("Order deletion", () => {
 
 describe("Customer accounts (admin)", () => {
   it("edits, promotes, protects the last admin and self, deletes while keeping orders", async () => {
-    const { deleteUserByAdmin, updateUserByAdmin } = await import("@/server/services/user-admin");
+    const { deleteUserByAdmin, updateUserByAdmin } = await import("@/backend/services/user-admin");
     const admin = await createUser("ADMIN");
     const client = await createUser("CUSTOMER");
     await updateUserByAdmin(client.id, { fullName: "Nouveau Nom", phone: "0550123456" }, admin);

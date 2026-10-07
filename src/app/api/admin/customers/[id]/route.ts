@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { emailSchema, phoneSchema } from "@/lib/validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { deleteUserByAdmin, updateUserByAdmin } from "@/server/services/user-admin";
+import { emailSchema, phoneSchema } from "@/shared/lib/validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { deleteUserByAdmin, updateUserByAdmin } from "@/backend/services/user-admin";
 
 const schema = z.object({
   fullName: z.string().trim().min(2).max(120).optional(),

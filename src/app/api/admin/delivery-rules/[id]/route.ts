@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { deliveryRuleSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { saveDeliveryRule, deleteDeliveryRule } from "@/server/services/catalog-admin";
+import { deliveryRuleSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { saveDeliveryRule, deleteDeliveryRule } from "@/backend/services/catalog-admin";
 
 export const PUT = adminRoute<{ id: string }>(async (req, { params, user }) => {
   const input = await parseJson(req, deliveryRuleSchema);

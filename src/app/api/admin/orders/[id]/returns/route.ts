@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { adminReturnSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { RETURN_REASONS } from "@/lib/returns";
-import { createReturnRequest } from "@/server/services/returns";
+import { adminReturnSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { RETURN_REASONS } from "@/shared/lib/returns";
+import { createReturnRequest } from "@/backend/services/returns";
 
 /** A manager records a return / exchange the customer asked for by phone or message. */
 export const POST = adminRoute<{ id: string }>(async (req, { params, user }) => {

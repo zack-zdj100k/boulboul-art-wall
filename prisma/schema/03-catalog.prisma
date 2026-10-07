@@ -1,0 +1,181 @@
+// Catalogue: categories, products, created measures (prices), frames and options.
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  name          String
+  nameAr        String?
+  description   String?
+  descriptionAr String?
+  imageId       String?
+  image         Media?    @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  sortOrder     Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  products      Product[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Product {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  nameAr        String?
+  description   String        @default("")
+  descriptionAr String?
+  categoryId    String?
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status        ProductStatus @default(DRAFT)
+  isFeatured    Boolean       @default(false)
+  isDemo        Boolean       @default(false) // development seed content — never real business data
+
+  // Pricing (see src/shared/lib/pricing.ts):
+  //  1. a measure created by the admin (ProductMeasure) → its exact price
+  //  2. otherwise, when Sur Mesure is enabled: the stable reference price, ± step price for each
+  //     10 cm of length / height away from the reference measure.
+  allowCustomSize   Boolean @default(false) // "Sur Mesure" enabled for this product
+  refWidthCm        Int? // reference measure for Sur Mesure
+  refHeightCm       Int?
+  refPrice          Int? // stable price at the reference measure
+  widthStepPrice    Int? // DA added / removed per 10 cm of length
+  heightStepPrice   Int? // DA added / removed per 10 cm of height
+  customMinWidthCm  Int? // optional Sur Mesure limits
+  customMaxWidthCm  Int?
+  customMinHeightCm Int?
+  customMaxHeightCm Int?
+  customMinPrice    Int? // optional floor for the calculated price
+
+  promoType     PromotionType?
+  promoValue    Int?
+  promoStartsAt DateTime?
+  promoEndsAt   DateTime?
+
+  // Characteristics — all optional, filled by the business
+  materials       String?
+  weightKg        Decimal? @db.Decimal(6, 2)
+  depthCm         Decimal? @db.Decimal(6, 1)
+  colors          String[] @default([])
+  characteristics String[] @default([])
+
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int       @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  images     ProductImage[]
+  measures   ProductMeasure[]
+  frames     ProductFrame[]
+  extras     ProductExtra[]
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  @@index([status, categoryId])
+  @@index([status, isFeatured])
+  @@index([status, createdAt])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media   @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  alt       String?
+  sortOrder Int     @default(0)
+
+  @@index([productId, sortOrder])
+}
+
+// Measures created by the admin for a product, each with its exact price (any cm value).
+// They always take priority over the Sur Mesure calculation.
+model ProductMeasure {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  widthCm     Int
+  heightCm    Int
+  price       Int
+  label       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, widthCm, heightCm])
+  @@index([productId, isActive])
+}
+
+model FrameOption {
+  id          String         @id @default(cuid())
+  name        String
+  nameAr      String?
+  description String?
+  swatch      String? // CSS colour used for the selector swatch
+  imageId     String?
+  image       Media?         @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  price       Int            @default(0) // fixed add-on, never depends on the dimensions
+  isActive    Boolean        @default(true)
+  isDemo      Boolean        @default(false)
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  products    ProductFrame[]
+}
+
+model ProductFrame {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  frameId       String
+  frame         FrameOption @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  priceOverride Int?
+  isDefault     Boolean     @default(false)
+
+  @@id([productId, frameId])
+}
+
+// Optional extras (mirror, LED lighting, accessories…), configured by the admin.
+model ExtraOption {
+  id                 String         @id @default(cuid())
+  name               String
+  nameAr             String?
+  description        String?
+  price              Int            @default(0)
+  isActive           Boolean        @default(true)
+  availableForCustom Boolean        @default(true)
+  // Colours the customer can pick for this option, e.g. LED tones: [{ name, hex }]
+  colors             Json           @default("[]")
+  // Ask the customer for a short note when chosen (e.g. where to place the mirror)
+  askNote            Boolean        @default(false)
+  notePrompt         String?
+  notePromptAr       String?
+  isDemo             Boolean        @default(false)
+  sortOrder          Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  products           ProductExtra[]
+}
+
+model ProductExtra {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  extraId       String
+  extra         ExtraOption @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  priceOverride Int?
+
+  @@id([productId, extraId])
+}

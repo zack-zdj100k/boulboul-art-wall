@@ -1,0 +1,49 @@
+// CMS content, settings, delivery rates and audit log.
+
+model CmsSection {
+  id          String    @id @default(cuid())
+  key         String    @unique // e.g. "home.hero", "about.founders"
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  updatedById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// Most specific active rule wins: (wilaya + commune) > wilaya > default (both null).
+model DeliveryRule {
+  id          String   @id @default(cuid())
+  wilayaCode  String?
+  commune     String?
+  fee         Int // à domicile
+  stopDeskFee Int? // point relais (stop desk); null = not offered
+  returnFee   Int? // carrier fee when a parcel comes back (information for the team)
+  freeAbove   Int? // subtotal from which delivery is free
+  isActive    Boolean  @default(true)
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, wilayaCode])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String // e.g. "product.update", "order.status"
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

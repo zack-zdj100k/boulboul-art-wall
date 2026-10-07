@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { canAccessOrder } from "@/server/auth/order-access";
-import { prisma } from "@/server/db";
-import { notFound, publicRoute } from "@/server/http";
+import { canAccessOrder } from "@/backend/auth/order-access";
+import { prisma } from "@/backend/db";
+import { notFound, publicRoute } from "@/backend/http";
 
 // Owner (signed in) or holder of the order's private token. Anyone else gets a 404.
 export const GET = publicRoute<{ orderNumber: string }>(async (req, { params, user }) => {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { dimensionChangeSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { changeOrderDimensions, previewDimensionChange } from "@/server/services/order";
+import { dimensionChangeSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { changeOrderDimensions, previewDimensionChange } from "@/backend/services/order";
 
 /** Preview: ?itemId=&widthCm=&heightCm= — same pricing engine, nothing saved. */
 export const GET = adminRoute<{ id: string }>(async (req, { params }) => {

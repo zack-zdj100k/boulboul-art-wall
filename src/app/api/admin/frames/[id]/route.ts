@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { frameAdminSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { saveFrame, deleteFrame } from "@/server/services/catalog-admin";
+import { frameAdminSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { saveFrame, deleteFrame } from "@/backend/services/catalog-admin";
 
 export const PUT = adminRoute<{ id: string }>(async (req, { params, user }) => {
   const input = await parseJson(req, frameAdminSchema);

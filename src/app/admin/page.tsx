@@ -1,9 +1,9 @@
 import { AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Empty, PageHeader, Panel, StatusBadge, Table } from "@/components/admin/ui";
-import { Badge } from "@/components/ui/badge";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { getDashboardStats, hasDemoData } from "@/server/services/stats";
+import { Empty, PageHeader, Panel, StatusBadge, Table } from "@/frontend/components/admin/ui";
+import { Badge } from "@/frontend/components/ui/badge";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { getDashboardStats, hasDemoData } from "@/backend/services/stats";
 
 export const metadata = { title: "Tableau de bord" };
 

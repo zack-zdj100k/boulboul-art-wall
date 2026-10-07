@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { z } from "zod";
-import { DeleteOrderButton } from "@/components/admin/delete-order-button";
-import { CUSTOM_STATUS_FR, Empty, PageHeader, StatusBadge, Table } from "@/components/admin/ui";
-import { Pagination } from "@/components/ui/pagination";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { cn } from "@/lib/utils";
-import { listCustomOrders } from "@/server/services/admin-queries";
+import { DeleteOrderButton } from "@/frontend/components/admin/delete-order-button";
+import { CUSTOM_STATUS_FR, Empty, PageHeader, StatusBadge, Table } from "@/frontend/components/admin/ui";
+import { Pagination } from "@/frontend/components/ui/pagination";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { cn } from "@/shared/lib/utils";
+import { listCustomOrders } from "@/backend/services/admin-queries";
 
 export const metadata = { title: "Demandes sur mesure" };
 

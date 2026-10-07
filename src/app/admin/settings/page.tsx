@@ -1,11 +1,11 @@
-import { DeliveryRulesManager, ExtrasManager, FramesManager } from "@/components/admin/catalog-managers";
-import { EmailSettingsForm, GeneralSettingsForm, PurgeDemoButton } from "@/components/admin/settings-forms";
-import { PageHeader, Panel } from "@/components/admin/ui";
-import { prisma } from "@/server/db";
-import { env } from "@/server/env";
-import { getAllSettings } from "@/server/services/settings";
-import { hasDemoData } from "@/server/services/stats";
-import { mediaUrl } from "@/server/storage";
+import { DeliveryRulesManager, ExtrasManager, FramesManager } from "@/frontend/components/admin/catalog-managers";
+import { EmailSettingsForm, GeneralSettingsForm, PurgeDemoButton } from "@/frontend/components/admin/settings-forms";
+import { PageHeader, Panel } from "@/frontend/components/admin/ui";
+import { prisma } from "@/backend/db";
+import { env } from "@/backend/env";
+import { getAllSettings } from "@/backend/services/settings";
+import { hasDemoData } from "@/backend/services/stats";
+import { mediaUrl } from "@/backend/storage";
 
 export const metadata = { title: "Paramètres" };
 

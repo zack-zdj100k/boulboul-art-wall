@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { signUploadToken } from "@/server/auth/tokens";
-import { badRequest, clientIp, publicRoute } from "@/server/http";
-import { rateLimit } from "@/server/rate-limit";
-import { uploadImage } from "@/server/services/media";
+import { signUploadToken } from "@/backend/auth/tokens";
+import { badRequest, clientIp, publicRoute } from "@/backend/http";
+import { rateLimit } from "@/backend/rate-limit";
+import { uploadImage } from "@/backend/services/media";
 
 // Customer design upload for /customize. Stored PRIVATE: only admins (and the uploader) can read it.
 export const POST = publicRoute(async (req, { user }) => {

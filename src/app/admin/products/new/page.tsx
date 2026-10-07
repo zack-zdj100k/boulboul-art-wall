@@ -1,6 +1,6 @@
-import { ProductEditor } from "@/components/admin/product-editor";
-import { PageHeader } from "@/components/admin/ui";
-import { EMPTY_PRODUCT, loadEditorOptions } from "@/server/services/product-form";
+import { ProductEditor } from "@/frontend/components/admin/product-editor";
+import { PageHeader } from "@/frontend/components/admin/ui";
+import { EMPTY_PRODUCT, loadEditorOptions } from "@/backend/services/product-form";
 
 export const metadata = { title: "Nouveau produit" };
 

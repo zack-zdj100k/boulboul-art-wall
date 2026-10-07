@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { FounderCard } from "@/components/site/founder-card";
-import { ButtonLink } from "@/components/ui/button";
-import { Reveal } from "@/components/ui/reveal";
-import { getI18n } from "@/i18n/server";
-import { TestimonialsColumns } from "@/components/home/testimonials-columns";
-import { SectionHeading } from "@/components/ui/section";
-import { getAboutContent, getHomeContent } from "@/server/cms-content";
-import { listTestimonials } from "@/server/services/review";
+import { FounderCard } from "@/frontend/components/site/founder-card";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { getI18n } from "@/shared/i18n/server";
+import { TestimonialsColumns } from "@/frontend/components/home/testimonials-columns";
+import { SectionHeading } from "@/frontend/components/ui/section";
+import { getAboutContent, getHomeContent } from "@/backend/cms-content";
+import { listTestimonials } from "@/backend/services/review";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t, locale } = await getI18n();

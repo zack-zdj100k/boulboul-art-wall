@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { customOrderSchema } from "@/lib/validation";
-import { signUploadToken } from "@/server/auth/tokens";
-import { prisma } from "@/server/db";
-import { memoryProvider } from "@/server/email/providers";
-import { createCustomOrder } from "@/server/services/custom-order";
-import { uploadImage } from "@/server/services/media";
-import { listProductReviews, moderateReview, submitReview } from "@/server/services/review";
+import { customOrderSchema } from "@/shared/lib/validation";
+import { signUploadToken } from "@/backend/auth/tokens";
+import { prisma } from "@/backend/db";
+import { memoryProvider } from "@/backend/email/providers";
+import { createCustomOrder } from "@/backend/services/custom-order";
+import { uploadImage } from "@/backend/services/media";
+import { listProductReviews, moderateReview, submitReview } from "@/backend/services/review";
 import { createProductFixture, createUser, resetDb } from "./helpers";
 
 beforeEach(async () => {
@@ -43,7 +43,7 @@ describe("Custom design requests", () => {
   });
 
   it("stores an estimate from the Sur Mesure settings (stable price ± per 10 cm + options)", async () => {
-    const { updateSettings } = await import("@/server/services/settings");
+    const { updateSettings } = await import("@/backend/services/settings");
     await updateSettings({ "custom.refWidthCm": 60, "custom.refHeightCm": 80, "custom.refPrice": 5_000, "custom.widthStepPrice": 200, "custom.heightStepPrice": 200 });
     const frame = await prisma.frameOption.create({ data: { name: "Noir", price: 1_000 } });
     const order = await createCustomOrder(request({ description: "Un portrait", widthCm: 70, heightCm: 90, frameId: frame.id }), null);
@@ -85,14 +85,14 @@ describe("Reviews", () => {
 
 describe("Custom request quote", () => {
   it("computes price − discount + delivery on the server, never below zero", async () => {
-    const { computeCustomQuote } = await import("@/lib/quote");
+    const { computeCustomQuote } = await import("@/shared/lib/quote");
     expect(computeCustomQuote({ price: null })).toEqual({ discount: 0, total: null });
     expect(computeCustomQuote({ price: 20_000, discountType: "PERCENT", discountValue: 10, deliveryFee: 800 })).toEqual({ discount: 2_000, total: 18_800 });
     expect(computeCustomQuote({ price: 5_000, discountType: "FIXED", discountValue: 9_000 })).toEqual({ discount: 5_000, total: 0 });
   });
 
   it("stores the admin quote and ignores any client total", async () => {
-    const { updateCustomOrder } = await import("@/server/services/custom-order");
+    const { updateCustomOrder } = await import("@/backend/services/custom-order");
     const admin = await createUser("ADMIN");
     const order = await createCustomOrder(request({ description: "Un miroir arche pour l'entrée." }), null);
     const updated = await updateCustomOrder(order.id, { price: 15_000, discountType: "FIXED", discountValue: 1_000, deliveryFee: 500, total: 1 } as never, admin.id);
@@ -102,7 +102,7 @@ describe("Custom request quote", () => {
   });
 
   it("appears in the unified Commandes list next to catalogue orders", async () => {
-    const { searchAllOrders } = await import("@/server/services/admin-queries");
+    const { searchAllOrders } = await import("@/backend/services/admin-queries");
     await createCustomOrder(request({ description: "Une idée de canvas." }), null);
     const all = await searchAllOrders({});
     expect(all.rows.map((r) => r.kind)).toContain("CUSTOM");
@@ -112,7 +112,7 @@ describe("Custom request quote", () => {
 
 describe("Media deletion", () => {
   it("refuses in-use images unless forced, then detaches them", async () => {
-    const { deleteMedia } = await import("@/server/services/media");
+    const { deleteMedia } = await import("@/backend/services/media");
     const admin = await createUser("ADMIN");
     const media = await uploadImage({ file: await pngFile(), visibility: "PUBLIC", userId: admin.id });
     const product = await prisma.product.create({

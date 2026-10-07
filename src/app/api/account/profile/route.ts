@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { profileSchema } from "@/lib/validation";
-import { prisma } from "@/server/db";
-import { parseJson, userRoute } from "@/server/http";
+import { profileSchema } from "@/shared/lib/validation";
+import { prisma } from "@/backend/db";
+import { parseJson, userRoute } from "@/backend/http";
 
 export const PATCH = userRoute(async (req, { user }) => {
   const input = await parseJson(req, profileSchema);

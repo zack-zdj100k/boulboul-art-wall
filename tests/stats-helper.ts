@@ -1,3 +1,3 @@
-import { getDashboardStats } from "@/server/services/stats";
+import { getDashboardStats } from "@/backend/services/stats";
 
 export const getStats = getDashboardStats;

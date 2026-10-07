@@ -10,9 +10,9 @@ import {
   startingPrice,
   type PricingProduct,
   type SurMesureConfig,
-} from "@/lib/pricing";
-import { estimateCustom } from "@/lib/quote";
-import { quoteDelivery } from "@/server/services/delivery";
+} from "@/shared/lib/pricing";
+import { estimateCustom } from "@/shared/lib/quote";
+import { quoteDelivery } from "@/backend/services/delivery";
 
 const row = (id: string, widthCm: number, heightCm: number, price: number, isActive = true, label: string | null = null) => ({ id, widthCm, heightCm, price, isActive, label });
 
@@ -157,7 +157,7 @@ describe("DeliveryService", () => {
 
 describe("Dashboard revenue", () => {
   it("delivered totals − returned pieces (minus their negotiated share) ± completed exchange differences", async () => {
-    const { computeRevenue, returnRefund } = await import("@/server/services/stats");
+    const { computeRevenue, returnRefund } = await import("@/backend/services/stats");
     const order = { subtotal: 10_000, negotiatedDiscount: 1_000 };
     const ret = { type: "RETURN" as const, status: "COMPLETED", quantity: 1, replacementPrice: null, orderItem: { unitPrice: 5_000 }, order };
     expect(returnRefund(ret)).toBe(4_500); // 5 000 × 9 000 / 10 000

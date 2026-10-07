@@ -1,7 +1,7 @@
-import { CategoriesManager } from "@/components/admin/catalog-managers";
-import { PageHeader } from "@/components/admin/ui";
-import { prisma } from "@/server/db";
-import { mediaUrl } from "@/server/storage";
+import { CategoriesManager } from "@/frontend/components/admin/catalog-managers";
+import { PageHeader } from "@/frontend/components/admin/ui";
+import { prisma } from "@/backend/db";
+import { mediaUrl } from "@/backend/storage";
 
 export const metadata = { title: "Catégories" };
 

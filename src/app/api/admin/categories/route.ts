@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { categoryAdminSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { saveCategory } from "@/server/services/catalog-admin";
+import { categoryAdminSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { saveCategory } from "@/backend/services/catalog-admin";
 
 export const GET = adminRoute(async () => NextResponse.json({ items: await prisma.category.findMany({ orderBy: { sortOrder: "asc" } }) }));
 

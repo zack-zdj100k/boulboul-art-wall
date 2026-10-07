@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getLocale } from "@/i18n/server";
-import { publicRoute } from "@/server/http";
-import { listCatalog } from "@/server/services/product";
+import { getLocale } from "@/shared/i18n/server";
+import { publicRoute } from "@/backend/http";
+import { listCatalog } from "@/backend/services/product";
 
 const querySchema = z.object({
   q: z.string().max(80).optional(),

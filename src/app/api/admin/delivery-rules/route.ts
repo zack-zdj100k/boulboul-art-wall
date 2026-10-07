@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { deliveryRuleSchema } from "@/lib/admin-validation";
-import { prisma } from "@/server/db";
-import { adminRoute, parseJson } from "@/server/http";
-import { saveDeliveryRule } from "@/server/services/catalog-admin";
+import { deliveryRuleSchema } from "@/shared/lib/admin-validation";
+import { prisma } from "@/backend/db";
+import { adminRoute, parseJson } from "@/backend/http";
+import { saveDeliveryRule } from "@/backend/services/catalog-admin";
 
 export const GET = adminRoute(async () => NextResponse.json({ items: await prisma.deliveryRule.findMany({ orderBy: [{ wilayaCode: "asc" }, { commune: "asc" }] }) }));
 

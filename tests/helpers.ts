@@ -1,5 +1,5 @@
-import { prisma } from "@/server/db";
-import { hashPassword } from "@/server/auth/password";
+import { prisma } from "@/backend/db";
+import { hashPassword } from "@/backend/auth/password";
 
 export async function resetDb() {
   const tables = await prisma.$queryRaw<{ tablename: string }[]>`

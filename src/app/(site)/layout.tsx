@@ -1,8 +1,8 @@
-import { SiteFooter } from "@/components/site/site-footer";
-import { SiteHeader } from "@/components/site/site-header";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
-import { getFooterData } from "@/server/site-data";
+import { SiteFooter } from "@/frontend/components/site/site-footer";
+import { SiteHeader } from "@/frontend/components/site/site-header";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
+import { getFooterData } from "@/backend/site-data";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [{ locale }, user] = await Promise.all([getI18n(), getCurrentUser()]);

@@ -5,7 +5,7 @@ async function loadCloudinary() {
   vi.resetModules();
   vi.stubEnv("STORAGE_DRIVER", "cloudinary");
   vi.stubEnv("CLOUDINARY_URL", "cloudinary://123456:abcd@demo-cloud");
-  return import("@/server/storage");
+  return import("@/backend/storage");
 }
 
 afterEach(() => {

@@ -1,0 +1,56 @@
+// Customers, admins and sessions.
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum ReferralSource {
+  TIKTOK
+  INSTAGRAM
+  FACEBOOK
+  OTHER
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  fullName       String
+  age            Int?
+  phone          String?
+  referralSource ReferralSource?
+  referralOther  String?
+  role           Role            @default(CUSTOMER)
+  isActive       Boolean         @default(true)
+  isDemo         Boolean         @default(false)
+  lastLoginAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  sessions      Session[]
+  orders        Order[]
+  customOrders  CustomOrder[]
+  reviews       Review[]               @relation("ReviewAuthor")
+  moderated     Review[]               @relation("ReviewModerator")
+  statusChanges OrderStatusHistory[]
+  adjustments   OrderPriceAdjustment[]
+  returnEvents  ReturnStatusHistory[]
+  auditLogs     AuditLog[]
+  uploads       Media[]
+
+  @@index([role])
+}
+
+model Session {
+  // id = SHA-256 of the opaque token stored in the cookie; the raw token never touches the DB.
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}

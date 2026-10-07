@@ -1,0 +1,64 @@
+// Returns and exchanges on delivered orders.
+
+enum ReturnType {
+  RETURN
+  EXCHANGE
+}
+
+enum ReturnStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  RETURN_RECEIVED
+  EXCHANGE_PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+// Return / exchange requests. The order's price snapshot is never modified by them.
+model ReturnRequest {
+  id                     String                @id @default(cuid())
+  orderId                String
+  order                  Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId            String?
+  orderItem              OrderItem?            @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  quantity               Int                   @default(1)
+  type                   ReturnType
+  // Exchange: the measure the customer takes instead, priced by the pricing engine when recorded
+  // (information only — the order's price snapshot never changes).
+  replacementWidthCm     Int?
+  replacementHeightCm    Int?
+  replacementPricingType PricingSource?
+  replacementPrice       Int? // per unit, after promotion, with options
+  // Exchange for anything: another product, frame or options
+  replacementProductId   String?
+  replacementProductName String?
+  replacementFrameName   String?
+  replacementExtras      Json? // [{ id, name, price }]
+  status                 ReturnStatus          @default(REQUESTED)
+  reason                 String
+  details                String?
+  source                 ReviewSource          @default(CUSTOMER) // CUSTOMER (website) or ADMIN (recorded by a manager)
+  managerNote            String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  history                ReturnStatusHistory[]
+
+  @@index([status, createdAt])
+  @@index([orderId])
+}
+
+model ReturnStatusHistory {
+  id          String        @id @default(cuid())
+  requestId   String
+  request     ReturnRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus  ReturnStatus?
+  toStatus    ReturnStatus
+  changedById String?
+  changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  @@index([requestId, createdAt])
+}

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getCurrentUser } from "@/server/auth/session";
-import { prisma } from "@/server/db";
-import { getStorage } from "@/server/storage";
+import { getCurrentUser } from "@/backend/auth/session";
+import { prisma } from "@/backend/db";
+import { getStorage } from "@/backend/storage";
 
 // Serves stored media. PUBLIC files are cacheable; PRIVATE files (customer designs) require
 // an admin or the uploader, and are never cached by shared caches.

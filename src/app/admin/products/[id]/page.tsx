@@ -1,12 +1,12 @@
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductEditor } from "@/components/admin/product-editor";
-import { ProductPricingManager } from "@/components/admin/product-pricing";
-import { ProductAdminTabs } from "@/components/admin/product-tabs";
-import { PageHeader } from "@/components/admin/ui";
-import { isSurMesureConfigured } from "@/server/services/pricing";
-import { loadEditorOptions, loadProductForm, loadProductPricing } from "@/server/services/product-form";
+import { ProductEditor } from "@/frontend/components/admin/product-editor";
+import { ProductPricingManager } from "@/frontend/components/admin/product-pricing";
+import { ProductAdminTabs } from "@/frontend/components/admin/product-tabs";
+import { PageHeader } from "@/frontend/components/admin/ui";
+import { isSurMesureConfigured } from "@/backend/services/pricing";
+import { loadEditorOptions, loadProductForm, loadProductPricing } from "@/backend/services/product-form";
 
 export const metadata = { title: "Modifier le produit" };
 

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { ButtonLink } from "@/components/ui/button";
-import { Reveal } from "@/components/ui/reveal";
-import { getI18n } from "@/i18n/server";
-import { getWhyContent } from "@/server/cms-content";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { getI18n } from "@/shared/i18n/server";
+import { getWhyContent } from "@/backend/cms-content";
 
 const BLOCK_LABELS: Record<string, Record<string, string>> = {
   materials: { fr: "Matériaux", ar: "المواد" },

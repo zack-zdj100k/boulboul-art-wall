@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CustomDesignForm } from "@/components/forms/custom-design-form";
-import { Reveal } from "@/components/ui/reveal";
-import { pick } from "@/i18n/config";
-import { parseColors } from "@/lib/options";
-import { getI18n } from "@/i18n/server";
-import { getCurrentUser } from "@/server/auth/session";
-import { prisma } from "@/server/db";
-import { getCustomEstimateConfig, getSettings } from "@/server/services/settings";
+import { CustomDesignForm } from "@/frontend/components/forms/custom-design-form";
+import { Reveal } from "@/frontend/components/ui/reveal";
+import { pick } from "@/shared/i18n/config";
+import { parseColors } from "@/shared/lib/options";
+import { getI18n } from "@/shared/i18n/server";
+import { getCurrentUser } from "@/backend/auth/session";
+import { prisma } from "@/backend/db";
+import { getCustomEstimateConfig, getSettings } from "@/backend/services/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();

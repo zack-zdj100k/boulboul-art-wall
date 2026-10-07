@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { prisma } from "@/server/db";
-import { memoryProvider } from "@/server/email/providers";
-import { changeOrderDimensions, createOrder, negotiateOrder, previewDimensionChange, revertOrderStatus, separateDelivery, setOrderDeliveryFee, updateOrderStatus } from "@/server/services/order";
-import { createReturnRequest, deleteReturnRequest, returnableQuantities, updateReturnStatus } from "@/server/services/returns";
+import { prisma } from "@/backend/db";
+import { memoryProvider } from "@/backend/email/providers";
+import { changeOrderDimensions, createOrder, negotiateOrder, previewDimensionChange, revertOrderStatus, separateDelivery, setOrderDeliveryFee, updateOrderStatus } from "@/backend/services/order";
+import { createReturnRequest, deleteReturnRequest, returnableQuantities, updateReturnStatus } from "@/backend/services/returns";
 import { createProductFixture, createUser, customer, resetDb, surMesureFixture } from "./helpers";
 
 beforeEach(async () => {
@@ -175,7 +175,7 @@ describe("Email triggers (exactly two)", () => {
   });
 
   it("notification settings: several admin recipients, sender name, customer emails can be turned off", async () => {
-    const { updateSettings } = await import("@/server/services/settings");
+    const { updateSettings } = await import("@/backend/services/settings");
     await updateSettings({ "email.adminRecipients": "boss@test.dz, shop@test.dz", "email.fromName": "Boulboul Cadres", "email.customerConfirmed": false, "email.customerDelivered": false });
     const admin = await createUser("ADMIN");
     const { order } = await placeOrder();

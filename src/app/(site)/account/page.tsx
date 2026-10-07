@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ProfileForm, SignOutButton } from "@/components/account/account-actions";
-import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
-import { formatDate, formatPrice } from "@/i18n/config";
-import { getI18n } from "@/i18n/server";
-import { requireUser } from "@/server/auth/guards";
-import { prisma } from "@/server/db";
-import { cn } from "@/lib/utils";
+import { ProfileForm, SignOutButton } from "@/frontend/components/account/account-actions";
+import { Badge } from "@/frontend/components/ui/badge";
+import { ButtonLink } from "@/frontend/components/ui/button";
+import { formatDate, formatPrice } from "@/shared/i18n/config";
+import { getI18n } from "@/shared/i18n/server";
+import { requireUser } from "@/backend/auth/guards";
+import { prisma } from "@/backend/db";
+import { cn } from "@/shared/lib/utils";
 
 export const metadata: Metadata = { title: "Mon compte", robots: { index: false } };
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { measurePatchSchema } from "@/lib/admin-validation";
-import { adminRoute, parseJson } from "@/server/http";
-import { deleteMeasure, updateMeasure } from "@/server/services/product-pricing";
+import { measurePatchSchema } from "@/shared/lib/admin-validation";
+import { adminRoute, parseJson } from "@/backend/http";
+import { deleteMeasure, updateMeasure } from "@/backend/services/product-pricing";
 
 export const PATCH = adminRoute<{ id: string; rowId: string }>(async (req, { params, user }) => {
   const data = await parseJson(req, measurePatchSchema);

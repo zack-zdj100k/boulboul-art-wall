@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { LOCALE_COOKIE, LOCALES } from "@/i18n/config";
-import { parseJson, publicRoute } from "@/server/http";
+import { LOCALE_COOKIE, LOCALES } from "@/shared/i18n/config";
+import { parseJson, publicRoute } from "@/backend/http";
 
 export const POST = publicRoute(async (req) => {
   const { locale } = await parseJson(req, z.object({ locale: z.enum(LOCALES) }));

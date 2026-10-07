@@ -51,22 +51,42 @@ What the business must fill in (Admin → Contenu / Paramètres):
 
 ## Architecture
 
+One Next.js app (deployed as one project on Vercel), with the code split by role:
+
 ```
-prisma/              schema, migrations, development seed
-src/app/(site)/      public pages (home, /wall-art, /customize, /about, /why-boulboul, /account, /order)
-src/app/admin/       back-office (server-side ADMIN check in layout + every /api/admin route)
-src/app/api/         REST route handlers (auth, products, pricing, orders, custom-orders, uploads, reviews, admin/*)
-src/app/media/       authorised file server for uploads (private customer designs → admin/uploader only)
-src/server/
-  services/          PricingService, OrderService, CustomOrderService, ProductService, ReviewService,
-                     MediaService, CMSService, DeliveryService, settings, audit, stats
-  email/             EmailService (exactly two templates) + providers (smtp | resend | log | memory)
-  storage/           local disk / S3-compatible driver (SigV4, no SDK)
-  auth/              scrypt password hashing, DB sessions, guards, upload tokens
-src/lib/             shared validation (Zod), CMS schema, Algerian wilayas, API client
-src/i18n/            fr (default) / ar (RTL) dictionaries, server + client helpers
-src/components/      ui (design system), site, home, product, forms, account, admin
-tests/               pricing, order flow & email triggers, auth/authorization, uploads, custom orders, admin
+prisma/
+  schema/            database schema, one file per domain (00-config, 01-identity, 02-media,
+                     03-catalog, 04-orders, 05-returns, 06-custom-orders, 07-reviews,
+                     08-notifications, 09-site)
+  migrations/        SQL migrations (applied by `prisma migrate deploy` on every Vercel build)
+  seed.ts, data/     development demo data, ZR Express delivery rates
+
+src/
+  app/               Next.js routes (must stay here)
+    (site)/          public pages: home, /wall-art, /commande, /customize, /about, /account, /order
+    admin/           back-office pages (ADMIN check in the layout + in every /api/admin route)
+    api/             HTTP entry points of the backend (REST route handlers)
+    media/           authorised file server (private customer designs → admin/uploader only)
+
+  frontend/          what runs in the browser / renders the UI
+    components/      ui (design system), site, home, shop, product, cart, forms, account, order, admin
+    hooks/           React hooks
+    lib/             browser-only helpers: basket (cart.ts), API client
+
+  backend/           server only (never sent to the browser)
+    services/        pricing, orders, returns, products & pricing tables, custom orders, reviews,
+                     media, CMS, delivery, settings, users, stats, audit
+    email/           notifications (new order → admin, confirmed / delivered → customer) + providers
+    storage/         local disk, S3-compatible or Cloudinary
+    auth/            password hashing, DB sessions, guards, order access, upload tokens
+    generated/       Prisma Client (generated, not committed)
+    db.ts, env.ts, http.ts …
+
+  shared/            used by both sides
+    lib/             pricing engine, validation (Zod), CMS schema, wilayas & communes, options
+    i18n/            fr (default) / ar (RTL) dictionaries, server + client helpers
+
+tests/               pricing, order flow & emails, auth, uploads, custom orders, admin, storage
 ```
 
 ### Business rules implemented
@@ -155,8 +175,8 @@ Do not use `EMAIL_PROVIDER=log` or `STORAGE_DRIVER=local` on Vercel: its disk is
 ## Notes & known limits
 
 - The admin interface is French only (internal tool); the public site is French and Arabic (RTL).
-- Wilayas: the 58 wilayas used by the carriers (`src/lib/algeria.ts`); communes come from the official
-  list (`src/lib/algeria-communes.json`, geoalgeria — MIT), 2026 wilayas listed under their former wilaya.
+- Wilayas: the 58 wilayas used by the carriers (`src/shared/lib/algeria.ts`); communes come from the official
+  list (`src/shared/lib/algeria-communes.json`, geoalgeria — MIT), 2026 wilayas listed under their former wilaya.
 - Prices are integer dinars (DZD). Payment happens offline; Boulboul confirms each order.
 - Design references (DestinationCard, Footer-01, Team-01, Testimonials Columns, v-form-8, the scroll
   frame-sequence hero and the photo-sphere gallery) were re-interpreted as one Boulboul design system;
