@@ -1,0 +1,14 @@
+import { NextResponse } from "next/server";
+import { registerSchema } from "@/lib/validation";
+import { createSession } from "@/server/auth/session";
+import { clientIp, parseJson, publicRoute } from "@/server/http";
+import { rateLimit } from "@/server/rate-limit";
+import { registerUser } from "@/server/services/user";
+
+export const POST = publicRoute(async (req) => {
+  rateLimit(`register:${clientIp(req)}`, 5, 15 * 60_000);
+  const input = await parseJson(req, registerSchema);
+  const user = await registerUser(input);
+  await createSession(user.id, req.headers.get("user-agent"));
+  return NextResponse.json({ user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role } }, { status: 201 });
+});

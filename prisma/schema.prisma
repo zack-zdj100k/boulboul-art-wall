@@ -1,0 +1,662 @@
+// Boulboul Art Wall — database schema
+// Money is stored as integer Algerian dinars (DZD has no fractional unit in practice).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────── Enums
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum ReferralSource {
+  TIKTOK
+  INSTAGRAM
+  FACEBOOK
+  OTHER
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+// Where an order's official price came from (see src/lib/pricing.ts).
+enum PricingSource {
+  PRESET // a measure created by the admin, with its exact price
+  SUR_MESURE // any other measure: reference price ± step price per 10 cm
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+enum OrderStatus {
+  PENDING
+  CONTACTING
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryMethod {
+  HOME // à domicile
+  STOP_DESK // point relais du transporteur
+}
+
+enum AdjustmentKind {
+  NEGOTIATION // per-order discount agreed with the customer
+  DIMENSION_CHANGE // dimensions changed by a manager, price looked up again
+  DELIVERY_FEE // delivery fee set or changed by a manager
+}
+
+enum ReturnType {
+  RETURN
+  EXCHANGE
+}
+
+enum ReturnStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  RETURN_RECEIVED
+  EXCHANGE_PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum CustomOrderStatus {
+  PENDING
+  REVIEWING
+  CONTACTED
+  APPROVED
+  REJECTED
+  DELIVERED
+  COMPLETED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum ReviewSource {
+  CUSTOMER // submitted on the website by a signed-in customer
+  ADMIN // real feedback transcribed by an admin (e.g. received by message)
+}
+
+enum MediaVisibility {
+  PUBLIC
+  PRIVATE // customer uploads: only admins (and the owner) can read them
+}
+
+enum EmailType {
+  NEW_ORDER_ADMIN
+  ORDER_CONFIRMED_CUSTOMER
+  ORDER_DELIVERED_CUSTOMER
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+}
+
+// ─────────────────────────────────────────── Identity
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  fullName       String
+  age            Int?
+  phone          String?
+  referralSource ReferralSource?
+  referralOther  String?
+  role           Role            @default(CUSTOMER)
+  isActive       Boolean         @default(true)
+  isDemo         Boolean         @default(false)
+  lastLoginAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  sessions      Session[]
+  orders        Order[]
+  customOrders  CustomOrder[]
+  reviews       Review[]               @relation("ReviewAuthor")
+  moderated     Review[]               @relation("ReviewModerator")
+  statusChanges OrderStatusHistory[]
+  adjustments   OrderPriceAdjustment[]
+  returnEvents  ReturnStatusHistory[]
+  auditLogs     AuditLog[]
+  uploads       Media[]
+
+  @@index([role])
+}
+
+model Session {
+  // id = SHA-256 of the opaque token stored in the cookie; the raw token never touches the DB.
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─────────────────────────────────────────── Media
+
+model Media {
+  id           String          @id @default(cuid())
+  key          String          @unique // storage key, generated server-side
+  mime         String
+  size         Int
+  width        Int?
+  height       Int?
+  originalName String // sanitised, display only
+  alt          String?
+  visibility   MediaVisibility @default(PUBLIC)
+  uploadedById String?
+  uploadedBy   User?           @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime        @default(now())
+
+  productImages ProductImage[]
+  categories    Category[]
+  frames        FrameOption[]
+  customOrders  CustomOrder[]
+
+  @@index([visibility, createdAt])
+}
+
+// ─────────────────────────────────────────── Catalogue
+
+model Category {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  name          String
+  nameAr        String?
+  description   String?
+  descriptionAr String?
+  imageId       String?
+  image         Media?    @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  sortOrder     Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  products      Product[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Product {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  nameAr        String?
+  description   String        @default("")
+  descriptionAr String?
+  categoryId    String?
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status        ProductStatus @default(DRAFT)
+  isFeatured    Boolean       @default(false)
+  isDemo        Boolean       @default(false) // development seed content — never real business data
+
+  // Pricing (see src/lib/pricing.ts):
+  //  1. a measure created by the admin (ProductMeasure) → its exact price
+  //  2. otherwise, when Sur Mesure is enabled: the stable reference price, ± step price for each
+  //     10 cm of length / height away from the reference measure.
+  allowCustomSize   Boolean @default(false) // "Sur Mesure" enabled for this product
+  refWidthCm        Int? // reference measure for Sur Mesure
+  refHeightCm       Int?
+  refPrice          Int? // stable price at the reference measure
+  widthStepPrice    Int? // DA added / removed per 10 cm of length
+  heightStepPrice   Int? // DA added / removed per 10 cm of height
+  customMinWidthCm  Int? // optional Sur Mesure limits
+  customMaxWidthCm  Int?
+  customMinHeightCm Int?
+  customMaxHeightCm Int?
+  customMinPrice    Int? // optional floor for the calculated price
+
+  promoType     PromotionType?
+  promoValue    Int?
+  promoStartsAt DateTime?
+  promoEndsAt   DateTime?
+
+  // Characteristics — all optional, filled by the business
+  materials       String?
+  weightKg        Decimal? @db.Decimal(6, 2)
+  depthCm         Decimal? @db.Decimal(6, 1)
+  colors          String[] @default([])
+  characteristics String[] @default([])
+
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int       @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  images     ProductImage[]
+  measures   ProductMeasure[]
+  frames     ProductFrame[]
+  extras     ProductExtra[]
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  @@index([status, categoryId])
+  @@index([status, isFeatured])
+  @@index([status, createdAt])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  mediaId   String
+  media     Media   @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  alt       String?
+  sortOrder Int     @default(0)
+
+  @@index([productId, sortOrder])
+}
+
+// Measures created by the admin for a product, each with its exact price (any cm value).
+// They always take priority over the Sur Mesure calculation.
+model ProductMeasure {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  widthCm     Int
+  heightCm    Int
+  price       Int
+  label       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, widthCm, heightCm])
+  @@index([productId, isActive])
+}
+
+model FrameOption {
+  id          String         @id @default(cuid())
+  name        String
+  nameAr      String?
+  description String?
+  swatch      String? // CSS colour used for the selector swatch
+  imageId     String?
+  image       Media?         @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  price       Int            @default(0) // fixed add-on, never depends on the dimensions
+  isActive    Boolean        @default(true)
+  isDemo      Boolean        @default(false)
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  products    ProductFrame[]
+}
+
+model ProductFrame {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  frameId       String
+  frame         FrameOption @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  priceOverride Int?
+  isDefault     Boolean     @default(false)
+
+  @@id([productId, frameId])
+}
+
+// Optional extras (mirror, LED lighting, accessories…), configured by the admin.
+model ExtraOption {
+  id                 String         @id @default(cuid())
+  name               String
+  nameAr             String?
+  description        String?
+  price              Int            @default(0)
+  isActive           Boolean        @default(true)
+  availableForCustom Boolean        @default(true)
+  // Colours the customer can pick for this option, e.g. LED tones: [{ name, hex }]
+  colors             Json           @default("[]")
+  // Ask the customer for a short note when chosen (e.g. where to place the mirror)
+  askNote            Boolean        @default(false)
+  notePrompt         String?
+  notePromptAr       String?
+  isDemo             Boolean        @default(false)
+  sortOrder          Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  products           ProductExtra[]
+}
+
+model ProductExtra {
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  extraId       String
+  extra         ExtraOption @relation(fields: [extraId], references: [id], onDelete: Cascade)
+  priceOverride Int?
+
+  @@id([productId, extraId])
+}
+
+// ─────────────────────────────────────────── Orders
+
+model Order {
+  id                 String         @id @default(cuid())
+  orderNumber        String         @unique // BAW-2026-000001
+  publicToken        String         @unique // lets a guest view their own confirmation page
+  userId             String?
+  user               User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName       String
+  email              String
+  phone              String
+  wilayaCode         String
+  wilayaName         String
+  commune            String
+  address            String
+  notes              String?
+  // subtotal = items after promotion (+ options); total = subtotal − negotiatedDiscount + deliveryFee
+  subtotal           Int
+  negotiatedDiscount Int            @default(0) // belongs to this order only — the price tables never change
+  deliveryFee        Int? // null = to be confirmed by Boulboul (no delivery rule configured)
+  deliveryMethod     DeliveryMethod @default(HOME)
+  // Same customer ordered again before the previous order was delivered: one parcel, the delivery
+  // is charged once, on the lead order (this order's fee is 0).
+  shipsWithId        String?
+  shipsWith          Order?         @relation("ShipsWith", fields: [shipsWithId], references: [id], onDelete: SetNull)
+  followers          Order[]        @relation("ShipsWith")
+  total              Int
+  currency           String         @default("DZD")
+  status             OrderStatus    @default(PENDING)
+  managerNotes       String? // private to admins
+  locale             String         @default("fr")
+  isDemo             Boolean        @default(false)
+  confirmedAt        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  items       OrderItem[]
+  history     OrderStatusHistory[]
+  adjustments OrderPriceAdjustment[]
+  returns     ReturnRequest[]
+  emails      EmailLog[]
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([email])
+}
+
+// Price snapshot: everything needed to understand the purchase is copied here, so later
+// product/price-table edits never change historical orders.
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName     String
+  productSlug     String
+  productImageUrl String?
+  widthCm         Int
+  heightCm        Int
+  frameId         String?
+  frameName       String?
+  color           String?
+  extras          Json     @default("[]") // [{ id, name, price, color?, note? }]
+
+  pricingType         PricingSource? // null only for orders created before the pricing tables
+  pricingRefId        String? // id of the ProductMeasure used (PRESET)
+  pricingLabel        String? // special-measure label at order time
+  officialPrice       Int // configured price for the dimensions (per unit)
+  promotionType       PromotionType?
+  promotionValue      Int?
+  promotionDiscount   Int             @default(0) // per unit
+  priceAfterPromotion Int // per unit
+  optionsPrice        Int             @default(0) // frame + extras, per unit
+  quantity            Int
+  unitPrice           Int // priceAfterPromotion + optionsPrice
+  totalPrice          Int // unitPrice × quantity
+  pricingBreakdown    Json
+  returns             ReturnRequest[]
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderStatusHistory {
+  id          String       @id @default(cuid())
+  orderId     String
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  changedById String?
+  changedBy   User?        @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// Every manager change to an order's price (negotiation, dimension change, delivery fee).
+// Append-only: this is the complete negotiation history of the order.
+model OrderPriceAdjustment {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind            AdjustmentKind
+  previousPrice   Int // final product price before the change (subtotal − negotiated discount)
+  newPrice        Int // final product price after the change
+  discountAmount  Int? // NEGOTIATION: negotiated discount now applied to the order
+  discountPercent Float? // NEGOTIATION: when entered as a percentage
+  previousTotal   Int
+  newTotal        Int
+  details         Json? // before/after dimensions, delivery fee, price snapshot…
+  note            String?
+  actorId         String?
+  actor           User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// Return / exchange requests. The order's price snapshot is never modified by them.
+model ReturnRequest {
+  id                     String                @id @default(cuid())
+  orderId                String
+  order                  Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId            String?
+  orderItem              OrderItem?            @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  quantity               Int                   @default(1)
+  type                   ReturnType
+  // Exchange: the measure the customer takes instead, priced by the pricing engine when recorded
+  // (information only — the order's price snapshot never changes).
+  replacementWidthCm     Int?
+  replacementHeightCm    Int?
+  replacementPricingType PricingSource?
+  replacementPrice       Int? // per unit, after promotion, with options
+  // Exchange for anything: another product, frame or options
+  replacementProductId   String?
+  replacementProductName String?
+  replacementFrameName   String?
+  replacementExtras      Json? // [{ id, name, price }]
+  status                 ReturnStatus          @default(REQUESTED)
+  reason                 String
+  details                String?
+  source                 ReviewSource          @default(CUSTOMER) // CUSTOMER (website) or ADMIN (recorded by a manager)
+  managerNote            String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  history                ReturnStatusHistory[]
+
+  @@index([status, createdAt])
+  @@index([orderId])
+}
+
+model ReturnStatusHistory {
+  id          String        @id @default(cuid())
+  requestId   String
+  request     ReturnRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus  ReturnStatus?
+  toStatus    ReturnStatus
+  changedById String?
+  changedBy   User?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  @@index([requestId, createdAt])
+}
+
+// Per-year sequence for human-readable order numbers.
+model Counter {
+  key   String @id // e.g. "order:2026", "custom:2026"
+  value Int    @default(0)
+}
+
+model EmailLog {
+  id                String      @id @default(cuid())
+  type              EmailType
+  orderId           String?
+  order             Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  to                String
+  subject           String
+  status            EmailStatus
+  provider          String
+  providerMessageId String?
+  error             String?
+  createdAt         DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([status, createdAt])
+}
+
+// ─────────────────────────────────────────── Custom design requests
+
+model CustomOrder {
+  id             String            @id @default(cuid())
+  reference      String            @unique // BAW-C-2026-000001
+  userId         String?
+  user           User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName   String
+  email          String
+  phone          String
+  wilayaCode     String?
+  wilayaName     String?
+  commune        String?
+  address        String?
+  designMediaId  String?
+  designMedia    Media?            @relation(fields: [designMediaId], references: [id], onDelete: SetNull)
+  description    String
+  widthCm        Int?
+  heightCm       Int?
+  frameId        String?
+  frameName      String?
+  extras         Json              @default("[]") // [{ id, name }]
+  otherIdea      String?
+  notes          String?
+  status         CustomOrderStatus @default(PENDING)
+  adminNotes     String?
+  // Indicative estimate computed at submission from the Sur Mesure settings (null if not configured).
+  estimatedPrice Int?
+  // Quote set by the admin after review (DZD). `total` is always computed server-side.
+  price          Int?
+  discountType   PromotionType?
+  discountValue  Int?
+  deliveryFee    Int?
+  total          Int?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────── Reviews
+
+model Review {
+  id               String       @id @default(cuid())
+  productId        String?
+  product          Product?     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?        @relation("ReviewAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  authorName       String
+  rating           Int
+  comment          String
+  status           ReviewStatus @default(PENDING)
+  source           ReviewSource @default(CUSTOMER)
+  verifiedPurchase Boolean      @default(false)
+  isFeatured       Boolean      @default(false) // shown in the home testimonials columns
+  moderatedById    String?
+  moderatedBy      User?        @relation("ReviewModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  moderatedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@unique([productId, userId])
+  @@index([status, productId])
+  @@index([status, isFeatured])
+}
+
+// ─────────────────────────────────────────── CMS, settings, delivery, audit
+
+model CmsSection {
+  id          String    @id @default(cuid())
+  key         String    @unique // e.g. "home.hero", "about.founders"
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  updatedById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// Most specific active rule wins: (wilaya + commune) > wilaya > default (both null).
+model DeliveryRule {
+  id          String   @id @default(cuid())
+  wilayaCode  String?
+  commune     String?
+  fee         Int // à domicile
+  stopDeskFee Int? // point relais (stop desk); null = not offered
+  returnFee   Int? // carrier fee when a parcel comes back (information for the team)
+  freeAbove   Int? // subtotal from which delivery is free
+  isActive    Boolean  @default(true)
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, wilayaCode])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String // e.g. "product.update", "order.status"
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
