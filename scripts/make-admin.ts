@@ -5,6 +5,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/backend/generated/prisma/client";
+import { pgConnectionString } from "../src/backend/pg-url";
 
 const email = process.argv[2]?.trim().toLowerCase();
 if (!email) {
@@ -12,7 +13,7 @@ if (!email) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pgConnectionString(process.env.DATABASE_URL!) }) });
 
 prisma.user
   .update({ where: { email }, data: { role: "ADMIN" }, select: { email: true, fullName: true, role: true } })

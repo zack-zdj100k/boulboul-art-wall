@@ -2,9 +2,10 @@ import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/backend/generated/prisma/client";
 import { env } from "@/backend/env";
+import { pgConnectionString } from "@/backend/pg-url";
 
 function createClient() {
-  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+  const adapter = new PrismaPg({ connectionString: pgConnectionString(env.DATABASE_URL) });
   return new PrismaClient({ adapter });
 }
 

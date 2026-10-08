@@ -6,9 +6,10 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/backend/generated/prisma/client";
+import { pgConnectionString } from "../src/backend/pg-url";
 import { ZR_EXPRESS_RATES } from "../prisma/data/zr-express-rates";
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pgConnectionString(process.env.DATABASE_URL!) }) });
 
 async function main() {
   let created = 0;

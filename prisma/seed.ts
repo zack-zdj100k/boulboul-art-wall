@@ -17,10 +17,11 @@ import path from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import sharp from "sharp";
 import { PrismaClient, type Prisma } from "../src/backend/generated/prisma/client";
+import { pgConnectionString } from "../src/backend/pg-url";
 import { hashPassword } from "../src/backend/auth/password";
 import { priceLine, surMesureFromProduct, type PricingProduct } from "../src/shared/lib/pricing";
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pgConnectionString(process.env.DATABASE_URL!) }) });
 const STORAGE_DIR = path.resolve(process.cwd(), process.env.STORAGE_LOCAL_DIR ?? "./storage/uploads");
 
 const T = (fr: string, ar: string) => ({ fr, ar });
