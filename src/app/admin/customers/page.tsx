@@ -43,7 +43,7 @@ export default async function AdminCustomers(props: PageProps<"/admin/customers"
       {result.customers.length ? (
         <Table>
           <thead>
-            <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>Âge</th><th>Découverte</th><th>Commandes</th><th>Sur mesure</th><th>Inscrit le</th><th><span className="sr-only">Actions</span></th></tr>
+            <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>Âge</th><th>Découverte</th><th>Commandes</th><th>Sur mesure</th><th>Inscrit le</th><th className="sticky end-0 z-[1]"><span className="sr-only">Actions</span></th></tr>
           </thead>
           <tbody>
             {result.customers.map((c) => (
@@ -59,7 +59,8 @@ export default async function AdminCustomers(props: PageProps<"/admin/customers"
                 <td className="tabular-nums">{c._count.orders}</td>
                 <td className="tabular-nums">{c._count.customOrders}</td>
                 <td className="text-stone">{formatDate(c.createdAt, "fr")}</td>
-                <td className="w-px">
+                {/* Pinned to the right edge: the "…" menu stays reachable when the table scrolls sideways. */}
+                <td className="sticky end-0 z-[1] w-px bg-ink shadow-[-8px_0_12px_-10px_rgb(0_0_0/0.25)]">
                   <CustomerActions isSelf={c.id === me.id} c={{ id: c.id, fullName: c.fullName, email: c.email, phone: c.phone, age: c.age, role: c.role, isActive: c.isActive, orders: c._count.orders }} />
                 </td>
               </tr>

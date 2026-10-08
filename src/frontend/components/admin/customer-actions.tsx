@@ -2,7 +2,8 @@
 
 import { MoreHorizontal, Pencil, ShieldCheck, ShieldOff, Trash2, UserCheck, UserX } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/frontend/components/ui/button";
 import { useConfirm } from "@/frontend/components/ui/confirm";
 import { Dialog } from "@/frontend/components/ui/dialog";
@@ -27,6 +28,30 @@ export function CustomerActions({ c, isSelf }: { c: Customer; isSelf: boolean })
   const toast = useToast();
   const confirm = useConfirm();
   const [menu, setMenu] = useState(false);
+  // The table scrolls horizontally (it clips its content), so the menu is drawn on top of the page,
+  // anchored to the "…" button, opening upwards when there is no room below.
+  const trigger = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; right: number } | null>(null);
+  const openMenu = () => {
+    const r = trigger.current?.getBoundingClientRect();
+    if (!r) return;
+    const right = Math.max(8, window.innerWidth - r.right);
+    setPos(window.innerHeight - r.bottom < 240 ? { bottom: window.innerHeight - r.top + 4, right } : { top: r.bottom + 4, right });
+    setMenu(true);
+  };
+  useEffect(() => {
+    if (!menu) return;
+    const close = () => setMenu(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menu]);
   const [edit, setEdit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [f, setF] = useState({ fullName: c.fullName, email: c.email, phone: c.phone ?? "", age: c.age?.toString() ?? "" });
@@ -52,13 +77,13 @@ export function CustomerActions({ c, isSelf }: { c: Customer; isSelf: boolean })
 
   return (
     <div className="relative">
-      <button type="button" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-label={`Actions pour ${c.fullName}`} className="grid size-9 place-items-center rounded-full text-sand hover:bg-ivory/8 hover:text-ivory">
+      <button ref={trigger} type="button" onClick={() => (menu ? setMenu(false) : openMenu())} aria-expanded={menu} aria-label={`Actions pour ${c.fullName}`} className="grid size-9 place-items-center rounded-full text-sand hover:bg-ivory/8 hover:text-ivory">
         <MoreHorizontal className="size-4" />
       </button>
-      {menu && (
+      {menu && pos && createPortal(
         <>
-          <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setMenu(false)} />
-          <div role="menu" className="absolute end-0 z-20 mt-1 flex w-60 flex-col rounded-field border border-line bg-umber-950 p-1 shadow-lifted">
+          <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-[90] cursor-default" onClick={() => setMenu(false)} />
+          <div role="menu" style={{ position: "fixed", top: pos.top, bottom: pos.bottom, right: pos.right }} className="z-[91] flex w-60 max-w-[calc(100vw-16px)] flex-col rounded-field border border-line bg-umber-950 p-1 shadow-lifted">
             <button role="menuitem" type="button" className={item} onClick={() => { setEdit(true); setMenu(false); }}>
               <Pencil className="size-4" /> Modifier
             </button>
@@ -107,7 +132,8 @@ export function CustomerActions({ c, isSelf }: { c: Customer; isSelf: boolean })
               <Trash2 className="size-4" /> Supprimer
             </button>
           </div>
-        </>
+        </>,
+        document.body,
       )}
 
       <Dialog open={edit} onClose={() => !busy && setEdit(false)} title={`Modifier ${c.fullName}`}>
