@@ -136,7 +136,7 @@ export default async function ProductPage(props: PageProps<"/wall-art/[slug]">) 
                   ))}
                 </ul>
               )}
-              <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-field border border-line bg-line text-sm">
+              <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-field border border-line bg-line text-sm [&>div:last-child:nth-child(odd)]:col-span-2">
                 {specs.map((s) => (
                   <div key={s.label} className="bg-ink p-4">
                     <dt className="text-xs text-stone">{s.label}</dt>
