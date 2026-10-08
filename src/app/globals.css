@@ -54,6 +54,36 @@
   --animate-sweep: sweep 2.8s var(--ease-gallery) infinite;
 }
 
+/* Home hero entrance — pure CSS so it plays on first paint, before JavaScript has loaded. */
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes hero-word {
+  from { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes hero-line {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes hero-diamond {
+  from { opacity: 0; transform: rotate(45deg) scale(0); }
+  to { opacity: 1; transform: rotate(45deg) scale(1); }
+}
+@keyframes hero-underline {
+  from { background-size: 0% 2px; }
+  to { background-size: 100% 2px; }
+}
+.hero-in { animation: hero-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-word { display: inline-block; animation: hero-word 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-line { animation: hero-line 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-diamond { animation: hero-diamond 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.hero-underline { animation: hero-underline 1.2s cubic-bezier(0.65, 0, 0.35, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-in, .hero-word, .hero-line, .hero-diamond, .hero-underline { animation: none; }
+}
+
 @keyframes sweep {
   0% { transform: translateX(-100%); }
   55% { transform: translateX(0); }
@@ -67,6 +97,9 @@
     color-scheme: light;
     scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
+    /* Never scroll sideways: Safari does not pass the body's "clip" on to the window. */
+    overflow-x: hidden;
+    width: 100%;
   }
   body {
     background: var(--color-ink);

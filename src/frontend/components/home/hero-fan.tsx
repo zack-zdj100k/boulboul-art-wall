@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue, type Variants } from "motion/react";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { ButtonLink } from "@/frontend/components/ui/button";
@@ -17,42 +17,14 @@ export type HeroFanContent = {
   secondary: { label: string; href: string } | null;
 };
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-
 // Three cards fanned out: the centre one raised, the sides tucked behind and tilted.
 // `depth` drives the pointer parallax, `float` the idle drift (different per card).
 const fanSlots = [
-  { width: "w-[38%]", layout: "-mr-8 z-10", rotate: -6, x: 48, y: 24, depth: 0.6, float: { y: 10, r: -1.4, d: 6.4 } },
-  { width: "w-[42%]", layout: "z-20", rotate: 0, x: 0, y: -8, depth: 1, float: { y: 14, r: 0.8, d: 5.2 } },
-  { width: "w-[38%]", layout: "-ml-8 z-10", rotate: 6, x: -48, y: 24, depth: 0.6, float: { y: 9, r: 1.4, d: 7.1 } },
+  { width: "w-[33%] sm:w-[38%]", layout: "-mr-4 sm:-mr-8 z-10", rotate: -6, y: 24, depth: 0.6, float: { y: 10, r: -1.4, d: 6.4 } },
+  { width: "w-[38%] sm:w-[42%]", layout: "z-20", rotate: 0, y: -8, depth: 1, float: { y: 14, r: 0.8, d: 5.2 } },
+  { width: "w-[33%] sm:w-[38%]", layout: "-ml-4 sm:-ml-8 z-10", rotate: 6, y: 24, depth: 0.6, float: { y: 9, r: 1.4, d: 7.1 } },
 ];
 type Slot = (typeof fanSlots)[number];
-
-const container: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 12, filter: "blur(6px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: EASE } },
-};
-
-const fanContainer: Variants = {
-  hidden: { opacity: 0, y: 12, filter: "blur(6px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.5, ease: EASE, delay: 0.4, delayChildren: 0.5, staggerChildren: 0.1 },
-  },
-};
-
-// Cards start stacked toward the centre, then slide out into the fan.
-const fanCard: Variants = {
-  hidden: (slot: Slot) => ({ x: slot.x, rotate: slot.rotate, y: slot.y }),
-  visible: (slot: Slot) => ({ x: 0, rotate: slot.rotate, y: slot.y, transition: { duration: 0.5, ease: EASE } }),
-};
 
 /** One card: entrance slot → idle float → pointer parallax → hover lift. */
 function FanCard({ slot, img, index, mx, my, reduce }: { slot: Slot; img: { src: string; alt: string }; index: number; mx: MotionValue<number>; my: MotionValue<number>; reduce: boolean }) {
@@ -60,7 +32,7 @@ function FanCard({ slot, img, index, mx, my, reduce }: { slot: Slot; img: { src:
   const py = useTransform(my, (v) => v * 18 * slot.depth);
   const tilt = useTransform(mx, (v) => v * 4 * slot.depth);
   return (
-    <motion.div custom={slot} variants={fanCard} className={cn("relative shrink-0", slot.width, slot.layout)}>
+    <div className={cn("relative shrink-0", slot.width, slot.layout)} style={{ transform: `translateY(${slot.y}px) rotate(${slot.rotate}deg)` }}>
       <motion.div
         animate={reduce ? undefined : { y: [0, -slot.float.y, 0], rotate: [0, slot.float.r, 0] }}
         transition={{ duration: slot.float.d, repeat: Infinity, ease: "easeInOut", delay: 1.2 + index * 0.4 }}
@@ -75,7 +47,7 @@ function FanCard({ slot, img, index, mx, my, reduce }: { slot: Slot; img: { src:
           </motion.div>
         </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -95,15 +67,9 @@ function HeroLede({ text, animate }: { text: string; animate: boolean }) {
   const underlineDelay = LEDE_START + (leadWords.length + 1) * WORD_STEP + 0.35;
 
   const word = (w: string, i: number, className?: string) => (
-    <motion.span
-      key={i}
-      className={cn("inline-block will-change-[filter,transform,opacity]", className)}
-      initial={animate ? { opacity: 0, y: 10, filter: "blur(6px)" } : false}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ delay: LEDE_START + i * WORD_STEP, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <span key={i} className={cn("inline-block", animate && "hero-word", className)} style={animate ? { animationDelay: `${LEDE_START + i * WORD_STEP}s` } : undefined}>
       {w}
-    </motion.span>
+    </span>
   );
   const withSpaces = (words: string[], offset: number, className?: string) =>
     words.flatMap((w, i) => [word(w, offset + i, className), i < words.length - 1 ? " " : null]);
@@ -112,24 +78,9 @@ function HeroLede({ text, animate }: { text: string; animate: boolean }) {
     <div className="flex w-full max-w-xl flex-col items-center gap-5">
       {/* Hairline + diamond */}
       <div aria-hidden className="flex w-40 items-center gap-2">
-        <motion.span
-          className="h-px flex-1 origin-right bg-gradient-to-l from-gold-soft/70 to-transparent"
-          initial={animate ? { scaleX: 0 } : false}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: LEDE_START - 0.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.span
-          className="size-1.5 rotate-45 bg-gold-soft"
-          initial={animate ? { scale: 0, opacity: 0 } : false}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: LEDE_START - 0.3, duration: 0.5, ease: "backOut" }}
-        />
-        <motion.span
-          className="h-px flex-1 origin-left bg-gradient-to-r from-gold-soft/70 to-transparent"
-          initial={animate ? { scaleX: 0 } : false}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: LEDE_START - 0.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        />
+        <span className={cn("h-px flex-1 origin-right bg-gradient-to-l from-gold-soft/70 to-transparent", animate && "hero-line")} style={{ animationDelay: `${LEDE_START - 0.2}s` }} />
+        <span className={cn("size-1.5 rotate-45 bg-gold-soft", animate && "hero-diamond")} style={{ animationDelay: `${LEDE_START - 0.3}s` }} />
+        <span className={cn("h-px flex-1 origin-left bg-gradient-to-r from-gold-soft/70 to-transparent", animate && "hero-line")} style={{ animationDelay: `${LEDE_START - 0.2}s` }} />
       </div>
 
       <p className="text-[15px] leading-[1.8] text-balance text-sand [--lede-from:left] rtl:[--lede-from:right] sm:text-[17px]">
@@ -138,20 +89,19 @@ function HeroLede({ text, animate }: { text: string; animate: boolean }) {
           {lead && (
             <>
               {/* Sage underline drawn under the lead once it is written — follows the text across line breaks. */}
-              <motion.span
-                className="font-medium text-ivory [box-decoration-break:clone] [-webkit-box-decoration-break:clone]"
+              <span
+                className={cn("font-medium text-ivory [box-decoration-break:clone] [-webkit-box-decoration-break:clone]", animate && "hero-underline")}
                 style={{
                   backgroundImage: "linear-gradient(90deg, rgb(138 154 123 / 0.15), rgb(138 154 123 / 0.9))",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "var(--lede-from, left) 100%",
+                  backgroundSize: "100% 2px",
                   paddingBottom: 3,
+                  animationDelay: `${underlineDelay}s`,
                 }}
-                initial={animate ? { backgroundSize: "0% 2px" } : false}
-                animate={{ backgroundSize: "100% 2px" }}
-                transition={{ delay: underlineDelay, duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
               >
                 {withSpaces(leadWords, 0)}
-              </motion.span>{" "}
+              </span>{" "}
               {word("—", leadWords.length, "text-gold-soft")}{" "}
             </>
           )}
@@ -176,13 +126,8 @@ export function HeroFan({ content }: { content: HeroFanContent }) {
   return (
     <section id="hero" aria-labelledby="hero-title" className="relative isolate w-full overflow-hidden bg-ink">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70%] bg-[radial-gradient(60%_60%_at_50%_0%,rgb(138_154_123/0.16),transparent_70%)]" />
-      <motion.div
-        className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 pt-[calc(72px+3rem)] pb-20 text-center sm:gap-10 sm:pt-[calc(72px+4.5rem)] sm:pb-28"
-        variants={animate ? container : undefined}
-        initial={animate ? "hidden" : false}
-        animate={animate ? "visible" : undefined}
-      >
-        <motion.div variants={animate ? item : undefined} className="flex w-full max-w-3xl flex-col items-center gap-5">
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 pt-[calc(72px+2.5rem)] pb-16 text-center sm:gap-10 sm:px-6 sm:pt-[calc(72px+4.5rem)] sm:pb-28">
+        <div className={cn("flex w-full max-w-3xl flex-col items-center gap-5", animate && "hero-in")} style={{ animationDelay: "0.05s" }}>
           <h1 id="hero-title" className="font-display text-4xl font-normal tracking-tight text-balance text-ivory sm:text-5xl md:text-6xl">
             {content.title}
             {hasLine2 && (
@@ -194,10 +139,10 @@ export function HeroFan({ content }: { content: HeroFanContent }) {
             )}
           </h1>
           {content.description && <HeroLede text={content.description} animate={animate} />}
-        </motion.div>
+        </div>
 
         {(content.primary || content.secondary || content.socialProof) && (
-          <motion.div variants={animate ? item : undefined} className="flex flex-col items-center gap-4">
+          <div className={cn("flex flex-col items-center gap-4", animate && "hero-in")} style={{ animationDelay: "0.15s" }}>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
               {content.primary && (
                 <ButtonLink href={content.primary.href}>
@@ -212,18 +157,15 @@ export function HeroFan({ content }: { content: HeroFanContent }) {
               )}
             </div>
             {content.socialProof && <p className="text-xs font-medium text-stone">{content.socialProof}</p>}
-          </motion.div>
+          </div>
         )}
 
         {content.images.length > 0 && (
-          <div className="mx-auto w-full max-w-3xl">
+          <div className={cn("mx-auto w-full max-w-3xl", animate && "hero-in")} style={{ animationDelay: "0.4s" }}>
             {/* The fan is pure imagery: keep the same composition in Arabic (RTL). */}
             <motion.div
               dir="ltr"
               className="relative flex w-full items-center justify-center"
-              variants={fanContainer}
-              initial={animate ? "hidden" : false}
-              animate="visible"
               style={{ perspective: 1200 }}
               onPointerMove={(e) => {
                 if (e.pointerType !== "mouse") return;
@@ -242,7 +184,7 @@ export function HeroFan({ content }: { content: HeroFanContent }) {
             </motion.div>
           </div>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }

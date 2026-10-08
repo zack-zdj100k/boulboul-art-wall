@@ -17,8 +17,10 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: proc
 prisma.user
   .update({ where: { email }, data: { role: "ADMIN" }, select: { email: true, fullName: true, role: true } })
   .then((u) => console.log(`✔ ${u.fullName} <${u.email}> is now ${u.role}`))
-  .catch(() => {
-    console.error(`No account found for ${email} — create it first at /account/register.`);
+  .catch((err: { code?: string; message?: string }) => {
+    if (err.code === "P2025") console.error(`No account found for ${email} — create it first at /account/register.`);
+    // Never print the connection string (it contains the database password).
+    else console.error(`Could not reach the database (check DATABASE_URL): ${(err.message?.split("\n").at(-1) ?? "").replace(/postgres(ql)?:\/\/\S*/g, "<url>")}`);
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

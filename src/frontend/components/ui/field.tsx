@@ -4,7 +4,7 @@ import { useId, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 
 export const fieldClasses =
-  "w-full rounded-field border border-line-strong bg-umber-900/70 px-4 text-[15px] text-ivory placeholder:text-stone/80 transition-[border-color,box-shadow,background-color] duration-200 hover:border-ivory/35 focus:border-gold focus:bg-umber-900 focus:outline-none focus:ring-4 focus:ring-gold/15 aria-[invalid=true]:border-ember aria-[invalid=true]:ring-ember/15 disabled:opacity-50";
+  "w-full rounded-field border border-line-strong bg-umber-900/70 px-4 text-base text-ivory md:text-[15px] placeholder:text-stone/80 transition-[border-color,box-shadow,background-color] duration-200 hover:border-ivory/35 focus:border-gold focus:bg-umber-900 focus:outline-none focus:ring-4 focus:ring-gold/15 aria-[invalid=true]:border-ember aria-[invalid=true]:ring-ember/15 disabled:opacity-50";
 
 type FieldProps = {
   label: ReactNode;

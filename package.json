@@ -18,6 +18,7 @@
     "postinstall": "prisma generate",
     "make-admin": "tsx scripts/make-admin.ts",
     "import-delivery-rates": "tsx scripts/import-delivery-rates.ts",
+    "publish-content": "tsx scripts/publish-content.ts",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {

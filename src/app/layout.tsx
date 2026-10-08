@@ -30,7 +30,17 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = { themeColor: "#faf7f0", colorScheme: "light" };
+// The site always fits the screen width: no pinch / double-tap zoom and no automatic zoom when a
+// form field is focused on iPhone (fields also use a 16px font on mobile).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#faf7f0",
+  colorScheme: "light",
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, dir, messages } = await getI18n();
