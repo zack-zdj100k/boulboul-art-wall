@@ -43,10 +43,14 @@ export function findDeliveryRule<T extends DeliveryRuleLike>(rules: T[], wilayaC
   );
 }
 
-export function quoteDelivery(rules: DeliveryRuleLike[], wilayaCode: string, commune: string, subtotal: number, method: DeliveryMethod = "HOME"): DeliveryQuote {
+/**
+ * `productsOfferDelivery`: every product of the order has "Livraison offerte" on — delivery is free
+ * whatever the destination (stop desk stays unavailable where the carrier has none).
+ */
+export function quoteDelivery(rules: DeliveryRuleLike[], wilayaCode: string, commune: string, subtotal: number, method: DeliveryMethod = "HOME", productsOfferDelivery = false): DeliveryQuote {
   const rule = findDeliveryRule(rules, wilayaCode, commune);
-  if (!rule) return { fee: null, free: false, ruleId: null, method, home: null, stopDesk: null };
-  const free = rule.freeAbove != null && subtotal >= rule.freeAbove;
+  if (!rule) return productsOfferDelivery ? { fee: 0, free: true, ruleId: null, method, home: 0, stopDesk: 0 } : { fee: null, free: false, ruleId: null, method, home: null, stopDesk: null };
+  const free = productsOfferDelivery || (rule.freeAbove != null && subtotal >= rule.freeAbove);
   const home = free ? 0 : rule.fee;
   const stopDesk = rule.stopDeskFee == null ? null : free ? 0 : rule.stopDeskFee;
   const fee = method === "STOP_DESK" ? stopDesk : home;

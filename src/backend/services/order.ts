@@ -149,10 +149,14 @@ export async function quoteOrder(input: Pick<CreateOrderInput, "items"> & { wila
 
   const subtotal = items.reduce((s, i) => s + i.quote.total, 0);
   const method = input.deliveryMethod ?? "HOME";
-  let delivery: ReturnType<typeof quoteDelivery> = { fee: null, free: false, ruleId: null, method, home: null, stopDesk: null };
+  // "Livraison offerte" on every product of the order → the whole parcel ships free.
+  const productsOfferDelivery = items.length > 0 && items.every((i) => products.get(i.productId)?.freeDelivery);
+  let delivery: ReturnType<typeof quoteDelivery> = productsOfferDelivery
+    ? { fee: 0, free: true, ruleId: null, method, home: 0, stopDesk: 0 }
+    : { fee: null, free: false, ruleId: null, method, home: null, stopDesk: null };
   if (input.wilayaCode) {
     const rules = await prisma.deliveryRule.findMany({ where: { isActive: true } });
-    delivery = quoteDelivery(rules, input.wilayaCode, input.commune ?? "", subtotal, method);
+    delivery = quoteDelivery(rules, input.wilayaCode, input.commune ?? "", subtotal, method, productsOfferDelivery);
   }
   const totals = calculateOrderTotal({ subtotal, negotiatedDiscount: 0, deliveryFee: delivery.fee });
   return { items, subtotal, delivery, total: totals.total };

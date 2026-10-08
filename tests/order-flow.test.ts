@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/backend/db";
 import { memoryProvider } from "@/backend/email/providers";
-import { changeOrderDimensions, createOrder, negotiateOrder, previewDimensionChange, revertOrderStatus, separateDelivery, setOrderDeliveryFee, updateOrderStatus } from "@/backend/services/order";
+import { changeOrderDimensions, createOrder, negotiateOrder, quoteOrder, previewDimensionChange, revertOrderStatus, separateDelivery, setOrderDeliveryFee, updateOrderStatus } from "@/backend/services/order";
 import { createReturnRequest, deleteReturnRequest, returnableQuantities, updateReturnStatus } from "@/backend/services/returns";
 import { createProductFixture, createUser, customer, resetDb, surMesureFixture } from "./helpers";
 
@@ -483,5 +483,19 @@ describe("Exchange for anything", () => {
     );
     expect(req).toMatchObject({ replacementProductId: other.id, replacementFrameName: "Cadre test", replacementPricingType: "SUR_MESURE", replacementPrice: 5_400 + 1_000 + 2_500 });
     expect(req.replacementExtras).toEqual([{ id: extra.id, name: "LED test", price: 2_500 }]);
+  });
+
+  it("an order ships free only when every product has 'Livraison offerte'", async () => {
+    await prisma.deliveryRule.create({ data: { wilayaCode: null, commune: null, fee: 700 } });
+    const { product: free } = await createProductFixture({ freeDelivery: true });
+    const { product: paid } = await createProductFixture();
+    const line = (productId: string) => ({ productId, widthCm: 100, heightCm: 100, extraIds: [], quantity: 1 });
+    const onlyFree = await quoteOrder({ items: [line(free.id)], wilayaCode: "16", commune: "Bab Ezzouar" });
+    expect(onlyFree.delivery).toMatchObject({ fee: 0, free: true });
+    expect(onlyFree.total).toBe(onlyFree.subtotal);
+    const mixed = await quoteOrder({ items: [line(free.id), line(paid.id)], wilayaCode: "16", commune: "Bab Ezzouar" });
+    expect(mixed.delivery).toMatchObject({ fee: 700, free: false });
+    const { order } = await createOrder({ items: [line(free.id)], customer }, { userId: null, locale: "fr" });
+    expect(order.deliveryFee).toBe(0);
   });
 });

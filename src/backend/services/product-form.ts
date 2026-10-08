@@ -9,7 +9,7 @@ const dt = (d: Date | null) => (d ? new Date(d.getTime() - d.getTimezoneOffset()
 
 export const EMPTY_PRODUCT: ProductFormValue = {
   name: "", nameAr: "", slug: "", description: "", descriptionAr: "",
-  categoryId: "", status: "DRAFT", isFeatured: false, isDemo: false, sortOrder: "0",
+  categoryId: "", status: "DRAFT", isFeatured: false, freeDelivery: false, isDemo: false, sortOrder: "0",
   promoType: "", promoValue: "", promoStartsAt: "", promoEndsAt: "",
   materials: "", weightKg: "", depthCm: "", colors: "", characteristics: "", seoTitle: "", seoDescription: "",
   images: [], frames: [], extras: [],
@@ -24,7 +24,7 @@ export async function loadProductForm(id: string): Promise<ProductFormValue | nu
   return {
     name: p.name, nameAr: s(p.nameAr), slug: p.slug,
     description: p.description, descriptionAr: s(p.descriptionAr),
-    categoryId: s(p.categoryId), status: p.status, isFeatured: p.isFeatured, isDemo: p.isDemo, sortOrder: s(p.sortOrder),
+    categoryId: s(p.categoryId), status: p.status, isFeatured: p.isFeatured, freeDelivery: p.freeDelivery, isDemo: p.isDemo, sortOrder: s(p.sortOrder),
     promoType: p.promoType ?? "", promoValue: s(p.promoValue), promoStartsAt: dt(p.promoStartsAt), promoEndsAt: dt(p.promoEndsAt),
     materials: s(p.materials), weightKg: s(p.weightKg), depthCm: s(p.depthCm), colors: p.colors.join(", "), characteristics: p.characteristics.join("\n"),
     seoTitle: s(p.seoTitle), seoDescription: s(p.seoDescription),

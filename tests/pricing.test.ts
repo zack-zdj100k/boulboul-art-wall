@@ -153,6 +153,12 @@ describe("DeliveryService", () => {
     expect(quoteDelivery(zr, "16", "Hydra", 1_000, "STOP_DESK")).toMatchObject({ fee: 430, home: 500, stopDesk: 430, method: "STOP_DESK" });
     expect(quoteDelivery(zr, "54", "In Guezzam", 1_000, "STOP_DESK")).toMatchObject({ fee: null, home: 1600, stopDesk: null });
   });
+  it("products with 'Livraison offerte' ship free everywhere (stop desk only where offered)", () => {
+    const zr = [{ id: "alger", wilayaCode: "16", commune: null, fee: 500, stopDeskFee: 430, freeAbove: null, isActive: true }, { id: "guezzam", wilayaCode: "54", commune: null, fee: 1600, stopDeskFee: null, freeAbove: null, isActive: true }];
+    expect(quoteDelivery(zr, "16", "Hydra", 1_000, "HOME", true)).toMatchObject({ fee: 0, free: true, home: 0, stopDesk: 0 });
+    expect(quoteDelivery(zr, "54", "In Guezzam", 1_000, "STOP_DESK", true)).toMatchObject({ fee: null, home: 0, stopDesk: null });
+    expect(quoteDelivery([], "16", "Hydra", 1_000, "HOME", true)).toMatchObject({ fee: 0, free: true });
+  });
 });
 
 describe("Dashboard revenue", () => {

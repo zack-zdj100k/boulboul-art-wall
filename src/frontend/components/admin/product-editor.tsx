@@ -20,7 +20,7 @@ export type ProductFormValue = {
   name: string; nameAr: string; slug: string;
   description: string; descriptionAr: string;
   categoryId: string; status: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  isFeatured: boolean; isDemo: boolean; sortOrder: string;
+  isFeatured: boolean; freeDelivery: boolean; isDemo: boolean; sortOrder: string;
   promoType: "" | "PERCENT" | "FIXED"; promoValue: string; promoStartsAt: string; promoEndsAt: string;
   materials: string; weightKg: string; depthCm: string; colors: string; characteristics: string;
   seoTitle: string; seoDescription: string;
@@ -257,6 +257,13 @@ export function ProductEditor({ id, initial, categories, frames, extras }: { id:
             </L>
             <L label="Ordre d'affichage"><input type="number" value={v.sortOrder} onChange={(e) => set("sortOrder", e.target.value)} className={inp} /></L>
             <label className="flex items-center gap-3 text-sm font-semibold"><input type="checkbox" checked={v.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} className="size-4 accent-[var(--color-gold)]" /> Mis en avant sur l&apos;accueil</label>
+            <label className="flex items-start gap-3 text-sm font-semibold">
+              <input type="checkbox" checked={v.freeDelivery} onChange={(e) => set("freeDelivery", e.target.checked)} className="mt-0.5 size-4 accent-[var(--color-gold)]" />
+              <span>
+                Livraison offerte
+                <span className="block text-xs font-normal text-stone">Badge « Livraison offerte » sur le produit. La commande est livrée gratuitement quand tous ses produits ont cette option.</span>
+              </span>
+            </label>
             <label className="flex items-center gap-3 text-sm font-semibold"><input type="checkbox" checked={v.isDemo} onChange={(e) => set("isDemo", e.target.checked)} className="size-4 accent-[var(--color-gold)]" /> Produit de démonstration <span className="text-xs font-normal text-stone">(prix indicatif)</span></label>
           </Section>
 

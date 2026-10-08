@@ -25,6 +25,7 @@ export const productAdminSchema = z
     categoryId: optStr(64),
     status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
     isFeatured: z.boolean().default(false),
+    freeDelivery: z.boolean().default(false),
     isDemo: z.boolean().default(false),
     promoType: z.preprocess((v) => (v === "" || v == null ? null : v), z.enum(["PERCENT", "FIXED"]).nullable()),
     promoValue: optMoney,

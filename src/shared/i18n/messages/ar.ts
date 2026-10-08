@@ -118,6 +118,7 @@ const ar: Messages = {
     joinCta: "إنشاء حساب",
   },
   product: {
+    freeDelivery: "توصيل مجاني",
     breadcrumb: "اللوحات الجدارية",
     dimensions: "المقاسات",
     width: "الطول",

@@ -17,6 +17,7 @@ export type ProductTileData = {
   originalPrice: number | null;
   hasPromo: boolean;
   isDemo: boolean;
+  freeDelivery?: boolean;
   swatches: { name: string; color: string }[];
 };
 
@@ -50,7 +51,10 @@ export function ProductTile({ product, priority = false }: { product: ProductTil
             />
           )}
           <div className="absolute inset-x-2 top-2 flex justify-between gap-2">
-            <span>{product.hasPromo && <Badge tone="ember">{t("shop.promo")}</Badge>}</span>
+            <span className="flex flex-wrap gap-1">
+              {product.hasPromo && <Badge tone="ember">{t("shop.promo")}</Badge>}
+              {product.freeDelivery && <Badge tone="free">{t("product.freeDelivery")}</Badge>}
+            </span>
             {product.isDemo && <Badge tone="demo">{t("common.demo")}</Badge>}
           </div>
         </div>

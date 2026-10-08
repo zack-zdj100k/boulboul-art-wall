@@ -93,6 +93,7 @@ export default async function ProductPage(props: PageProps<"/wall-art/[slug]">) 
               <div className="flex flex-wrap items-center gap-2">
                 {product.category && <p className="eyebrow">{product.category.name}</p>}
                 {product.promoActive && <Badge tone="ember">{t("shop.promo")}</Badge>}
+                {product.freeDelivery && <Badge tone="free">{t("product.freeDelivery")}</Badge>}
                 {product.isDemo && <Badge tone="demo">{t("common.demoNotice")}</Badge>}
               </div>
               <h1 className="font-display text-title font-light tracking-[-0.02em] text-balance">{product.name}</h1>

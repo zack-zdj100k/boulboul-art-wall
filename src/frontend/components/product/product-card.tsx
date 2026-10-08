@@ -23,6 +23,7 @@ export type ProductCardData = {
   allowCustomSize: boolean;
   sizesLabel: string | null;
   isDemo: boolean;
+  freeDelivery?: boolean;
 };
 
 /**
@@ -90,7 +91,10 @@ export function ProductCard({ product, priority = false, sizes = "(min-width: 12
           <span aria-hidden className="pointer-events-none absolute inset-0 rounded-art ring-1 ring-inset ring-white/8" />
 
           <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-4">
-            <div className="flex flex-wrap gap-1.5">{product.hasPromo && <Badge tone="ember">{t("shop.promo")}</Badge>}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {product.hasPromo && <Badge tone="ember">{t("shop.promo")}</Badge>}
+              {product.freeDelivery && <Badge tone="free">{t("product.freeDelivery")}</Badge>}
+            </div>
             {product.isDemo && <Badge tone="demo">{t("common.demo")}</Badge>}
           </div>
 

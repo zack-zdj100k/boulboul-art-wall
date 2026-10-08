@@ -64,7 +64,7 @@ export default async function AdminProducts(props: PageProps<"/admin/products">)
                 </td>
                 <td>
                   <Link href={`/admin/products/${p.id}`} className="font-semibold text-ivory hover:text-gold">{p.name}</Link>
-                  <span className="ms-2 inline-flex gap-1">{p.isFeatured && <Badge tone="gold">Accueil</Badge>}{p.isDemo && <Badge tone="demo">Démo</Badge>}</span>
+                  <span className="ms-2 inline-flex gap-1">{p.isFeatured && <Badge tone="gold">Accueil</Badge>}{p.freeDelivery && <Badge tone="sage">Livraison offerte</Badge>}{p.isDemo && <Badge tone="demo">Démo</Badge>}</span>
                   <span className="block text-xs text-stone">/{p.slug}</span>
                 </td>
                 <td>{p.category?.name ?? "—"}</td>

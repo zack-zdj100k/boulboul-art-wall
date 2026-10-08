@@ -122,6 +122,7 @@ const fr = {
     joinCta: "Créer un compte",
   },
   product: {
+    freeDelivery: "Livraison offerte",
     breadcrumb: "Wall Art",
     dimensions: "Dimensions",
     width: "Longueur",

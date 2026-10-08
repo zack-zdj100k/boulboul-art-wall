@@ -40,6 +40,8 @@ model Product {
   category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   status        ProductStatus @default(DRAFT)
   isFeatured    Boolean       @default(false)
+  // Delivery offered on this product: an order ships free when every product in it has this on.
+  freeDelivery  Boolean       @default(false)
   isDemo        Boolean       @default(false) // development seed content — never real business data
 
   // Pricing (see src/shared/lib/pricing.ts):

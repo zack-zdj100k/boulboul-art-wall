@@ -74,6 +74,7 @@ export type ProductCard = {
   sizesLabel: string | null;
   isDemo: boolean;
   isFeatured: boolean;
+  freeDelivery: boolean;
   createdAt: Date;
 };
 
@@ -101,6 +102,7 @@ function toCard(p: CardSource, locale: Locale, now: Date): ProductCard {
     sizesLabel: isSurMesureConfigured(surMesureFromProduct(p)) ? "Sur Mesure" : !sizes.length ? null : sizes.length === 1 ? `${sizes[0].widthCm}×${sizes[0].heightCm} cm` : `${sizes.length} formats`,
     isDemo: p.isDemo,
     isFeatured: p.isFeatured,
+    freeDelivery: p.freeDelivery,
     createdAt: p.createdAt,
   };
 }
@@ -241,6 +243,7 @@ export async function getProductDetail(slug: string, locale: Locale) {
     category: p.category ? { name: pick(p.category, "name", locale), slug: p.category.slug, id: p.category.id } : null,
     images: p.images.map((i) => ({ id: i.id, url: mediaUrl(i.media.key), alt: i.alt || i.media.alt || name, width: i.media.width, height: i.media.height })),
     isDemo: p.isDemo,
+    freeDelivery: p.freeDelivery,
     materials: p.materials,
     weightKg: p.weightKg ? Number(p.weightKg) : null,
     depthCm: p.depthCm ? Number(p.depthCm) : null,
