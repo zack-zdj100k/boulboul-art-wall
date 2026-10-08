@@ -100,8 +100,8 @@ tests/               pricing, order flow & emails, auth, uploads, custom orders,
   their confirmation page with a private random token.
 - **Status machine** `PENDING → CONFIRMED → SHIPPED → DELIVERED`, cancel from any non-final state,
   with history (who/when/note) and audit log.
-- **Exactly two emails:** new order → `ADMIN_EMAIL`; `PENDING → CONFIRMED` → customer. No other
-  transition sends anything. A failed send never rolls back the order: it is logged (`EmailLog`),
+- **Three emails:** new order → the admin recipients; confirmed → customer; delivered → customer
+  (each customer email can be switched off in Admin → Paramètres). No other transition sends anything. A failed send never rolls back the order: it is logged (`EmailLog`),
   shown on the admin order page with a « Renvoyer » button, and flagged on the dashboard.
 - **Custom requests** store a private upload (re-encoded to strip EXIF/GPS), dimensions, frame,
   extras and description; no automatic email.
@@ -133,7 +133,7 @@ never stack traces.
 
 See `.env.example`. Key variables:
 
-- `EMAIL_PROVIDER` — `smtp` (with `SMTP_*`), `resend` (with `EMAIL_PROVIDER_API_KEY`), or `log`
+- `EMAIL_PROVIDER` — `smtp` (Gmail, with `SMTP_*`, used in production), `resend` (with `EMAIL_PROVIDER_API_KEY`), or `log`
   (development: emails are written to `storage/emails/*.html`).
 - `ADMIN_EMAIL`, `EMAIL_FROM` — default recipient / sender of the order notifications (recipients,
   sender name and customer emails are then managed in Admin → Paramètres → E-mails & notifications).
@@ -159,8 +159,11 @@ See `.env.example`. Key variables:
 | `SESSION_SECRET` | a new random value: `openssl rand -hex 32` |
 | `STORAGE_DRIVER` | `cloudinary` |
 | `CLOUDINARY_URL` | `cloudinary://API_KEY:API_SECRET@CLOUD_NAME` |
-| `EMAIL_PROVIDER` | `resend` (+ `EMAIL_PROVIDER_API_KEY`) or `smtp` (+ `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`) |
-| `EMAIL_FROM` | `Boulboul Art Wall <commandes@your-domain>` |
+| `EMAIL_PROVIDER` | `smtp` |
+| `SMTP_HOST` / `SMTP_PORT` | `smtp.gmail.com` / `465` |
+| `SMTP_USER` | the Gmail address that sends the emails |
+| `SMTP_PASSWORD` | a Gmail **App Password** (myaccount.google.com/apppasswords, needs 2-Step Verification) |
+| `EMAIL_FROM` | `Boulboul Art Wall <the same Gmail address>` |
 | `ADMIN_EMAIL` | the inbox for "nouvelle commande" |
 
 Do not use `EMAIL_PROVIDER=log` or `STORAGE_DRIVER=local` on Vercel: its disk is read-only.
