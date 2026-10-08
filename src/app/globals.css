@@ -100,6 +100,8 @@
     /* Never scroll sideways: Safari does not pass the body's "clip" on to the window. */
     overflow-x: hidden;
     width: 100%;
+    /* No double-tap zoom; scrolling and taps stay instant. */
+    touch-action: manipulation;
   }
   body {
     background: var(--color-ink);

@@ -3,6 +3,7 @@ import { Fraunces, IBM_Plex_Sans_Arabic, Manrope } from "next/font/google";
 import { Providers } from "@/frontend/components/site/providers";
 import { getI18n } from "@/shared/i18n/server";
 import "./globals.css";
+import { NoZoom } from "@/frontend/components/site/no-zoom";
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", axes: ["opsz", "SOFT"], display: "swap" });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <noscript>
           <style>{`[style*="opacity:0"],[style*="opacity: 0"]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
+        <NoZoom />
         <Providers locale={locale} messages={messages}>
           {children}
         </Providers>
