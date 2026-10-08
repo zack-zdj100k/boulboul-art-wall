@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/frontend/components/ui/button";
 import { Field, Input } from "@/frontend/components/ui/field";
@@ -19,7 +18,6 @@ const STEP_FIELDS = [["fullName", "age"], ["phone", "email"], ["password", "conf
 /** Five short steps (v-form-8 language): one logical group of fields at a time. */
 export function RegisterForm({ next }: { next?: string }) {
   const { t } = useI18n();
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [form, setForm] = useState({ fullName: "", age: "", phone: "", email: "", password: "", confirmPassword: "", referralSource: "", referralOther: "" });
@@ -55,8 +53,7 @@ export function RegisterForm({ next }: { next?: string }) {
     setMessage(null);
     try {
       await api("/api/auth/register", { method: "POST", json: data() });
-      router.push(safeNext(next));
-      router.refresh();
+      window.location.assign(safeNext(next)); // full load with the new session cookie
     } catch (err) {
       const e = err instanceof ApiError ? err : new ApiError(0, "errors.generic");
       setMessage(t(e.code));

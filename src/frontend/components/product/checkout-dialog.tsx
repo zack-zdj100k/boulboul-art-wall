@@ -144,8 +144,11 @@ export function CheckoutDialog({
         },
       });
       onPlaced?.();
-      router.push(`/order/${encodeURIComponent(res.orderNumber)}?token=${encodeURIComponent(res.token)}`);
-      if (needsAccount) router.refresh(); // the header now shows the new account
+      const orderUrl = `/order/${encodeURIComponent(res.orderNumber)}?token=${encodeURIComponent(res.token)}`;
+      // A new account was signed in with the order: full load so every part of the page sees it.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the session cookie changed: a full load is intended
+      if (needsAccount) window.location.assign(orderUrl);
+      else router.push(orderUrl);
     } catch (e) {
       const err = e instanceof ApiError ? e : new ApiError(0, "errors.generic");
       const fields: Record<string, string> = {};

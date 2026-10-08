@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/frontend/components/ui/button";
 import { Field, Input } from "@/frontend/components/ui/field";
@@ -15,7 +14,6 @@ export function safeNext(next: string | null | undefined, fallback = "/account")
 
 export function LoginForm({ next }: { next?: string }) {
   const { t } = useI18n();
-  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
@@ -37,8 +35,9 @@ export function LoginForm({ next }: { next?: string }) {
         setMessage(null);
         try {
           const { user } = await api<{ user: { role: string } }>("/api/auth/login", { method: "POST", json: parsed.data });
-          router.push(safeNext(next, user.role === "ADMIN" ? "/admin" : "/account"));
-          router.refresh();
+          // Signed in/out: load the next page for real (one request with the new session cookie) instead of
+          // a client navigation + refresh, which could race and end on "This page couldn't load".
+          window.location.assign(safeNext(next, user.role === "ADMIN" ? "/admin" : "/account"));
         } catch (err) {
           setMessage(t(err instanceof ApiError ? err.code : "errors.generic"));
           setLoading(false);

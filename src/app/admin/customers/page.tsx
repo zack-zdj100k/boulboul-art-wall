@@ -43,7 +43,7 @@ export default async function AdminCustomers(props: PageProps<"/admin/customers"
       {result.customers.length ? (
         <Table>
           <thead>
-            <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th>Âge</th><th>Découverte</th><th>Commandes</th><th>Sur mesure</th><th>Inscrit le</th><th className="sticky end-0 z-[1]"><span className="sr-only">Actions</span></th></tr>
+            <tr><th>Nom</th><th>E-mail</th><th>Téléphone</th><th className="hidden 2xl:table-cell">Âge</th><th className="hidden 2xl:table-cell">Découverte</th><th>Commandes</th><th className="hidden 2xl:table-cell">Sur mesure</th><th className="hidden whitespace-nowrap xl:table-cell">Inscrit le</th><th><span className="sr-only">Actions</span></th></tr>
           </thead>
           <tbody>
             {result.customers.map((c) => (
@@ -54,13 +54,12 @@ export default async function AdminCustomers(props: PageProps<"/admin/customers"
                 </td>
                 <td><a href={`mailto:${c.email}`} className="text-gold hover:underline">{c.email}</a></td>
                 <td className="tabular-nums">{c.phone ?? "—"}</td>
-                <td className="tabular-nums">{c.age ?? "—"}</td>
-                <td>{c.referralSource ? REF[c.referralSource] : "—"}{c.referralOther ? ` (${c.referralOther})` : ""}</td>
+                <td className="hidden tabular-nums 2xl:table-cell">{c.age ?? "—"}</td>
+                <td className="hidden 2xl:table-cell">{c.referralSource ? REF[c.referralSource] : "—"}{c.referralOther ? ` (${c.referralOther})` : ""}</td>
                 <td className="tabular-nums">{c._count.orders}</td>
-                <td className="tabular-nums">{c._count.customOrders}</td>
-                <td className="text-stone">{formatDate(c.createdAt, "fr")}</td>
-                {/* Pinned to the right edge: the "…" menu stays reachable when the table scrolls sideways. */}
-                <td className="sticky end-0 z-[1] w-px bg-ink shadow-[-8px_0_12px_-10px_rgb(0_0_0/0.25)]">
+                <td className="hidden tabular-nums 2xl:table-cell">{c._count.customOrders}</td>
+                <td className="hidden whitespace-nowrap text-stone xl:table-cell">{formatDate(c.createdAt, "fr")}</td>
+                <td className="w-px">
                   <CustomerActions isSelf={c.id === me.id} c={{ id: c.id, fullName: c.fullName, email: c.email, phone: c.phone, age: c.age, role: c.role, isActive: c.isActive, orders: c._count.orders }} />
                 </td>
               </tr>

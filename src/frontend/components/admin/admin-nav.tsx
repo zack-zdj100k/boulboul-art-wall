@@ -2,7 +2,7 @@
 
 import { BarChart3, ExternalLink, FileText, RotateCcw, Image as ImageIcon, LayoutDashboard, LogOut, MessageSquare, Package, Palette, Settings, ShoppingBag, Tags, Users } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { BrandMark } from "@/frontend/components/site/brand";
 import { cn } from "@/shared/lib/utils";
 
@@ -23,7 +23,6 @@ const ITEMS = [
 
 export function AdminNav({ user, badges }: { user: { fullName: string; email: string }; badges: Record<string, number> }) {
   const pathname = usePathname();
-  const router = useRouter();
   const active = (href: string, exact?: boolean) => (exact ? pathname === href : pathname.startsWith(href));
 
   return (
@@ -76,8 +75,8 @@ export function AdminNav({ user, badges }: { user: { fullName: string; email: st
               type="button"
               onClick={async () => {
                 await fetch("/api/auth/logout", { method: "POST" });
-                router.push("/");
-                router.refresh();
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the session cookie changed: a full load is intended
+                window.location.assign("/"); // full load: the session cookie is gone
               }}
               className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-sand hover:text-ivory"
             >

@@ -12,7 +12,6 @@ import { profileSchema } from "@/shared/lib/validation";
 
 export function SignOutButton() {
   const { t } = useI18n();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   return (
     <Button
@@ -22,8 +21,8 @@ export function SignOutButton() {
       onClick={async () => {
         setLoading(true);
         await api("/api/auth/logout", { method: "POST" }).catch(() => {});
-        router.push("/");
-        router.refresh();
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the session cookie changed: a full load is intended
+        window.location.assign("/"); // full load: the session cookie is gone
       }}
     >
       <LogOut className="size-3.5" aria-hidden /> {t("common.signOut")}
