@@ -27,11 +27,17 @@ const logProvider: EmailProvider = {
 };
 
 function smtpProvider(): EmailProvider {
+  // Gmail: smtp.gmail.com + an App Password, which Google displays in groups ("abcd efgh ijkl mnop").
+  const gmail = /(^|\.)gmail\.com$/i.test(env.SMTP_HOST);
   const transport = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: env.SMTP_PORT === 465,
-    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASSWORD } : undefined,
+    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: gmail ? env.SMTP_PASSWORD.replace(/\s+/g, "") : env.SMTP_PASSWORD } : undefined,
+    // A slow mail server must not hold up the order: failures are logged and can be resent.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
   });
   return {
     name: "smtp",
