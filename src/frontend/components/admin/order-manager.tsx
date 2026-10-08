@@ -275,16 +275,19 @@ export function NegotiationPanel({ orderId, subtotal, negotiatedDiscount, delive
   const [type, setType] = useState<"AMOUNT" | "PERCENT">("AMOUNT");
   const [value, setValue] = useState("");
   const [note, setNote] = useState("");
+  // Free delivery can be part of the deal: the fee of this order only becomes 0 ("Offerte").
+  const [freeDelivery, setFreeDelivery] = useState(false);
+  const deliveryAlreadyFree = deliveryFee === 0;
+  const feeAfter = freeDelivery ? 0 : deliveryFee;
 
   let preview: { discount: number; percent: number | null; finalPrice: number; total: number } | null = null;
   let invalid = false;
-  if (value.trim() !== "") {
-    try {
-      const n = calculateNegotiatedPrice(subtotal, { type, value: Number(value) });
-      preview = { ...n, total: calculateOrderTotal({ subtotal, negotiatedDiscount: n.discount, deliveryFee }).total };
-    } catch (e) {
-      invalid = e instanceof PricingError;
-    }
+  const hasDiscount = value.trim() !== "";
+  try {
+    const n = hasDiscount ? calculateNegotiatedPrice(subtotal, { type, value: Number(value) }) : { discount: negotiatedDiscount, percent: null, finalPrice: subtotal - negotiatedDiscount };
+    if (hasDiscount || freeDelivery) preview = { ...n, total: calculateOrderTotal({ subtotal, negotiatedDiscount: n.discount, deliveryFee: feeAfter }).total };
+  } catch (e) {
+    invalid = e instanceof PricingError;
   }
 
   if (!editable) return <p className="text-sm text-stone">Commande livrée ou annulée : la négociation est close.</p>;
@@ -319,11 +322,25 @@ export function NegotiationPanel({ orderId, subtotal, negotiatedDiscount, delive
         <input type="range" min={0} max={subtotal} step={50} value={Math.min(Number(value) || 0, subtotal)} onChange={(e) => setValue(e.target.value)} aria-label="Ajuster la remise" className="w-full accent-[var(--color-gold)]" />
       )}
       <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Note (ex. accord par téléphone)" aria-label="Note de négociation" className={cn(inp, "w-full")} />
+      {deliveryAlreadyFree ? (
+        <p className="flex items-center gap-2 rounded-field border border-sage/40 bg-sage/10 px-3 py-2.5 text-sm font-semibold text-sage">✓ Livraison offerte pour cette commande</p>
+      ) : (
+        <label className={cn("flex cursor-pointer items-center gap-3 rounded-field border px-3 py-2.5 text-sm transition", freeDelivery ? "border-gold bg-gold/10" : "border-line-strong hover:border-ivory/40")}>
+          <input type="checkbox" checked={freeDelivery} onChange={(e) => setFreeDelivery(e.target.checked)} className="size-4 accent-[var(--color-gold)]" />
+          <span className="flex-1">
+            <span className="block font-semibold">Offrir la livraison</span>
+            <span className="block text-xs text-stone">
+              {deliveryFee == null ? "Frais encore à confirmer" : `Frais actuels : ${formatPrice(deliveryFee, "fr")}`} → le client voit « Offerte ».
+            </span>
+          </span>
+        </label>
+      )}
       {invalid && <p className="text-xs text-ember">{ERRORS["pricing.invalidDiscount"]}</p>}
       {preview && (
         <dl className="flex flex-col gap-1.5 rounded-field bg-umber-900 p-3 text-sm">
-          <Row label="Remise négociée" value={`− ${formatPrice(preview.discount, "fr")}${preview.percent != null ? ` (${preview.percent} %)` : ""}`} tone="gold" />
+          {preview.discount > 0 && <Row label="Remise négociée" value={`− ${formatPrice(preview.discount, "fr")}${preview.percent != null ? ` (${preview.percent} %)` : ""}`} tone="gold" />}
           <Row label="Prix final des produits" value={formatPrice(preview.finalPrice, "fr")} />
+          <Row label="Livraison" value={feeAfter == null ? "à confirmer" : feeAfter === 0 ? "Offerte" : formatPrice(feeAfter, "fr")} tone={freeDelivery ? "gold" : undefined} />
           <Row label="Nouveau total" value={formatPrice(preview.total, "fr")} strong />
         </dl>
       )}
@@ -334,13 +351,18 @@ export function NegotiationPanel({ orderId, subtotal, negotiatedDiscount, delive
           disabled={!preview || invalid}
           loading={busy}
           onClick={async () => {
-            if (await run(() => api(`/api/admin/orders/${orderId}/negotiation`, { method: "POST", json: { type, value: Number(value), note: note || undefined } }), "Négociation enregistrée.")) {
+            const done = await run(async () => {
+              if (hasDiscount) await api(`/api/admin/orders/${orderId}/negotiation`, { method: "POST", json: { type, value: Number(value), note: note || undefined } });
+              if (freeDelivery) await api(`/api/admin/orders/${orderId}/delivery`, { method: "POST", json: { deliveryFee: 0, note: note || "Livraison offerte (négociation)" } });
+            }, hasDiscount && freeDelivery ? "Remise et livraison offerte enregistrées." : freeDelivery ? "Livraison offerte." : "Négociation enregistrée.");
+            if (done) {
               setValue("");
               setNote("");
+              setFreeDelivery(false);
             }
           }}
         >
-          Appliquer la remise
+          {freeDelivery && !hasDiscount ? "Offrir la livraison" : freeDelivery ? "Appliquer la remise + livraison offerte" : "Appliquer la remise"}
         </Button>
         {negotiatedDiscount > 0 && (
           <Button size="sm" variant="ghost" disabled={busy} onClick={() => run(() => api(`/api/admin/orders/${orderId}/negotiation`, { method: "POST", json: { type: "AMOUNT", value: 0, note: note || "Négociation annulée" } }), "Négociation retirée.")}>
@@ -453,7 +475,13 @@ export function DeliveryFeePanel({ orderId, deliveryFee, editable }: { orderId: 
         <Button size="sm" variant="outline" disabled={invalid || parsed === deliveryFee} loading={busy} onClick={() => run(() => api(`/api/admin/orders/${orderId}/delivery`, { method: "POST", json: { deliveryFee: parsed, note: note || undefined } }), "Livraison mise à jour.")}>
           Enregistrer
         </Button>
+        {deliveryFee !== 0 && (
+          <Button size="sm" variant="gold" loading={busy} onClick={async () => { if (await run(() => api(`/api/admin/orders/${orderId}/delivery`, { method: "POST", json: { deliveryFee: 0, note: note || "Livraison offerte" } }), "Livraison offerte.")) setFee("0"); }}>
+            Offrir la livraison
+          </Button>
+        )}
       </div>
+      {deliveryFee === 0 && <p className="text-xs font-semibold text-sage">✓ Livraison offerte — le client voit « Offerte ».</p>}
       {invalid && <p className="text-xs text-ember">Montant entier ≥ 0.</p>}
     </div>
   );

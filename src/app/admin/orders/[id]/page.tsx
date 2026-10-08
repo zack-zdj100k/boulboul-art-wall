@@ -98,7 +98,9 @@ export default async function AdminOrderDetail(props: PageProps<"/admin/orders/[
             : `Négociation retirée · produits ${p(a.previousPrice)} → ${p(a.newPrice)}`
           : a.kind === "DIMENSION_CHANGE"
             ? `Dimensions ${(d.from as Dims)?.widthCm}×${(d.from as Dims)?.heightCm} → ${(d.to as Dims)?.widthCm}×${(d.to as Dims)?.heightCm} cm · total ${p(a.previousTotal)} → ${p(a.newTotal)}`
-            : `Livraison : ${d.from == null ? "à confirmer" : p(d.from as number)} → ${d.to == null ? "à confirmer" : p(d.to as number)}`;
+            : d.to === 0
+              ? `Livraison offerte (${d.from == null ? "frais à confirmer" : p(d.from as number)} → 0 DA) · total ${p(a.previousTotal)} → ${p(a.newTotal)}`
+              : `Livraison : ${d.from == null ? "à confirmer" : p(d.from as number)} → ${d.to == null ? "à confirmer" : p(d.to as number)}`;
       return { at: a.createdAt, title, by: a.actor?.fullName ?? null, note: a.note, tone: "gold" as const };
     }),
     ...order.returns.flatMap((r) =>

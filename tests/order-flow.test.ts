@@ -301,6 +301,19 @@ describe("Manager price changes (per order)", () => {
     await updateOrderStatus(order.id, "DELIVERED", admin);
     await expect(negotiateOrder(order.id, { type: "AMOUNT", value: 100 }, admin)).rejects.toMatchObject({ code: "order.closed" });
   });
+
+  it("free delivery can be offered with a negotiation (this order only)", async () => {
+    const admin = await createUser("ADMIN");
+    const { order } = await placeOrder();
+    await setOrderDeliveryFee(order.id, { deliveryFee: 600 }, admin);
+    await negotiateOrder(order.id, { type: "AMOUNT", value: 500 }, admin);
+    const totals = await setOrderDeliveryFee(order.id, { deliveryFee: 0, note: "Livraison offerte (négociation)" }, admin);
+    expect(totals.total).toBe(order.subtotal - 500);
+    const row = await prisma.order.findUniqueOrThrow({ where: { id: order.id }, include: { adjustments: true } });
+    expect(row).toMatchObject({ deliveryFee: 0, negotiatedDiscount: 500, total: order.subtotal - 500 });
+    expect(row.adjustments.find((a) => a.kind === "DELIVERY_FEE" && a.note === "Livraison offerte (négociation)")).toBeTruthy();
+    await expect(setOrderDeliveryFee(order.id, { deliveryFee: 0 }, admin)).rejects.toMatchObject({ code: "order.deliveryUnchanged" });
+  });
 });
 
 describe("Returns & exchanges", () => {
