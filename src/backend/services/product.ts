@@ -244,6 +244,7 @@ export async function getProductDetail(slug: string, locale: Locale) {
     images: p.images.map((i) => ({ id: i.id, url: mediaUrl(i.media.key), alt: i.alt || i.media.alt || name, width: i.media.width, height: i.media.height })),
     isDemo: p.isDemo,
     freeDelivery: p.freeDelivery,
+    productionNote: pick(p, "productionNote", locale) || null,
     materials: p.materials,
     weightKg: p.weightKg ? Number(p.weightKg) : null,
     depthCm: p.depthCm ? Number(p.depthCm) : null,

@@ -66,6 +66,8 @@ model Product {
   promoEndsAt   DateTime?
 
   // Characteristics — all optional, filled by the business
+  productionNote   String? // "Fabrication" line on the product page; empty = "Fabriqué à la commande"
+  productionNoteAr String?
   materials       String?
   weightKg        Decimal? @db.Decimal(6, 2)
   depthCm         Decimal? @db.Decimal(6, 1)

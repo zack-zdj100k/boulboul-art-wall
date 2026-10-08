@@ -22,7 +22,7 @@ export type ProductFormValue = {
   categoryId: string; status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   isFeatured: boolean; freeDelivery: boolean; isDemo: boolean; sortOrder: string;
   promoType: "" | "PERCENT" | "FIXED"; promoValue: string; promoStartsAt: string; promoEndsAt: string;
-  materials: string; weightKg: string; depthCm: string; colors: string; characteristics: string;
+  productionNote: string; productionNoteAr: string; materials: string; weightKg: string; depthCm: string; colors: string; characteristics: string;
   seoTitle: string; seoDescription: string;
   images: { mediaId: string; url: string; alt: string }[];
   frames: { frameId: string; priceOverride: string; isDefault: boolean }[];
@@ -231,6 +231,12 @@ export function ProductEditor({ id, initial, categories, frames, extras }: { id:
 
           <Section title="Caractéristiques" description="Ne renseignez que des informations réelles ; les champs vides ne sont pas affichés.">
             <div className="grid gap-4 sm:grid-cols-3">
+              <L label="Fabrication / délai (FR)" className="sm:col-span-3" help="Affiché sur la page produit (« Fabrication »). Vide = « Fabriqué à la commande ». Ex. « Prêt en 5 à 7 jours », « En stock — expédié sous 48 h ».">
+                <input value={v.productionNote} onChange={(e) => set("productionNote", e.target.value)} maxLength={120} placeholder="Fabriqué à la commande" className={inp} />
+              </L>
+              <L label="Fabrication / délai (AR)" className="sm:col-span-3" help="Vide = « يُصنع حسب الطلب ».">
+                <input dir="rtl" value={v.productionNoteAr} onChange={(e) => set("productionNoteAr", e.target.value)} maxLength={120} placeholder="يُصنع حسب الطلب" className={inp} />
+              </L>
               <L label="Matériaux" className="sm:col-span-3"><input value={v.materials} onChange={(e) => set("materials", e.target.value)} className={inp} /></L>
               <L label="Poids (kg)"><input type="number" step="0.01" value={v.weightKg} onChange={(e) => set("weightKg", e.target.value)} className={inp} /></L>
               <L label="Épaisseur (cm)"><input type="number" step="0.1" value={v.depthCm} onChange={(e) => set("depthCm", e.target.value)} className={inp} /></L>

@@ -62,7 +62,7 @@ export default async function ProductPage(props: PageProps<"/wall-art/[slug]">) 
     product.materials && { label: t("product.materials"), value: product.materials },
     product.weightKg && { label: t("product.weight"), value: `${product.weightKg} kg` },
     product.depthCm && { label: t("product.depth"), value: `${product.depthCm} cm` },
-    { label: t("product.availability"), value: t("product.madeToOrder") },
+    { label: t("product.availability"), value: product.productionNote || t("product.madeToOrder") },
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (

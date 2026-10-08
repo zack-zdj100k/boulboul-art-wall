@@ -31,6 +31,8 @@ export const productAdminSchema = z
     promoValue: optMoney,
     promoStartsAt: optDate,
     promoEndsAt: optDate,
+    productionNote: optStr(120),
+    productionNoteAr: optStr(120),
     materials: optStr(500),
     weightKg: optDecimal,
     depthCm: optDecimal,
