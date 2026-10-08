@@ -231,12 +231,7 @@ export function ProductEditor({ id, initial, categories, frames, extras }: { id:
 
           <Section title="Caractéristiques" description="Ne renseignez que des informations réelles ; les champs vides ne sont pas affichés.">
             <div className="grid gap-4 sm:grid-cols-3">
-              <L label="Fabrication / délai (FR)" className="sm:col-span-3" help="Affiché sur la page produit (« Fabrication »). Vide = « Fabriqué à la commande ». Ex. « Prêt en 5 à 7 jours », « En stock — expédié sous 48 h ».">
-                <input value={v.productionNote} onChange={(e) => set("productionNote", e.target.value)} maxLength={120} placeholder="Fabriqué à la commande" className={inp} />
-              </L>
-              <L label="Fabrication / délai (AR)" className="sm:col-span-3" help="Vide = « يُصنع حسب الطلب ».">
-                <input dir="rtl" value={v.productionNoteAr} onChange={(e) => set("productionNoteAr", e.target.value)} maxLength={120} placeholder="يُصنع حسب الطلب" className={inp} />
-              </L>
+              <ProductionNoteField fr={v.productionNote} ar={v.productionNoteAr} onChange={(fr, ar) => setV((x) => ({ ...x, productionNote: fr, productionNoteAr: ar }))} />
               <L label="Matériaux" className="sm:col-span-3"><input value={v.materials} onChange={(e) => set("materials", e.target.value)} className={inp} /></L>
               <L label="Poids (kg)"><input type="number" step="0.01" value={v.weightKg} onChange={(e) => set("weightKg", e.target.value)} className={inp} /></L>
               <L label="Épaisseur (cm)"><input type="number" step="0.1" value={v.depthCm} onChange={(e) => set("depthCm", e.target.value)} className={inp} /></L>
@@ -297,5 +292,52 @@ export function ProductEditor({ id, initial, categories, frames, extras }: { id:
         </div>
       </div>
     </form>
+  );
+}
+
+// "Fabrication" line of the product page: ready-made choices (FR + AR), or a custom text.
+const PRODUCTION_PRESETS: { fr: string; ar: string }[] = [
+  { fr: "En stock — expédié sous 24 à 48 h", ar: "متوفر — يُشحن خلال 24 إلى 48 ساعة" },
+  { fr: "Prêt en 2 à 3 jours", ar: "جاهز خلال 2 إلى 3 أيام" },
+  { fr: "Prêt en 3 à 5 jours", ar: "جاهز خلال 3 إلى 5 أيام" },
+  { fr: "Prêt en 5 à 7 jours", ar: "جاهز خلال 5 إلى 7 أيام" },
+  { fr: "Prêt en 7 à 10 jours", ar: "جاهز خلال 7 إلى 10 أيام" },
+  { fr: "Prêt en 10 à 15 jours", ar: "جاهز خلال 10 إلى 15 يوماً" },
+];
+
+function ProductionNoteField({ fr, ar, onChange }: { fr: string; ar: string; onChange: (fr: string, ar: string) => void }) {
+  const preset = PRODUCTION_PRESETS.findIndex((p) => p.fr === fr && p.ar === ar);
+  const [custom, setCustom] = useState(!!(fr || ar) && preset < 0);
+  const value = custom ? "custom" : preset >= 0 ? String(preset) : "default";
+  const select = "h-11 w-full rounded-field border border-line-strong bg-umber-900/70 px-3 text-sm";
+  return (
+    <div className="flex flex-col gap-3 sm:col-span-3">
+      <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-sand">
+        Fabrication / délai
+        <select
+          value={value}
+          onChange={(e) => {
+            const v = e.target.value;
+            setCustom(v === "custom");
+            if (v === "default") onChange("", "");
+            else if (v !== "custom") onChange(PRODUCTION_PRESETS[Number(v)].fr, PRODUCTION_PRESETS[Number(v)].ar);
+          }}
+          className={select}
+        >
+          <option value="default">Fabriqué à la commande (par défaut)</option>
+          {PRODUCTION_PRESETS.map((p, i) => (
+            <option key={p.fr} value={i}>{p.fr}</option>
+          ))}
+          <option value="custom">Autre (texte personnalisé)…</option>
+        </select>
+        <span className="text-xs font-normal text-stone">Affiché sur la page produit, ligne « Fabrication », en français et en arabe.</span>
+      </label>
+      {custom && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input value={fr} onChange={(e) => onChange(e.target.value, ar)} maxLength={120} placeholder="Texte en français" aria-label="Fabrication (français)" className={cn(fieldClasses, "h-11 font-normal")} />
+          <input dir="rtl" value={ar} onChange={(e) => onChange(fr, e.target.value)} maxLength={120} placeholder="النص بالعربية" aria-label="Fabrication (arabe)" className={cn(fieldClasses, "h-11 font-normal")} />
+        </div>
+      )}
+    </div>
   );
 }
