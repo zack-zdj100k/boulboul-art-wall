@@ -55,5 +55,11 @@
   },
   "engines": {
     "node": ">=20.9"
+  },
+  "allowScripts": {
+    "@prisma/engines": true,
+    "prisma": true,
+    "esbuild": true,
+    "unrs-resolver": true
   }
 }
