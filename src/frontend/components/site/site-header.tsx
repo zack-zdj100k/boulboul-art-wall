@@ -78,6 +78,9 @@ export function SiteHeader({ user }: { user: HeaderUser }) {
           </div>
 
           <div className={cn("pointer-events-auto flex items-center gap-1 rounded-full p-1 transition-[background-color,box-shadow,backdrop-filter] duration-500", !open && "bg-ink/80 shadow-[0_6px_24px_-12px_rgb(37_37_34/0.35)] backdrop-blur-md")}>
+            {/* Language: one toggle button on phones, both languages from tablets up. */}
+            <span className="sm:hidden"><LanguageSwitcher variant="toggle" /></span>
+            <span className="me-0.5 hidden sm:block"><LanguageSwitcher /></span>
             <CartBadge label={t("cart.title")} />
             <Link
               href="/account"
